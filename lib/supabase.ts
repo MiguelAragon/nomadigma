@@ -31,14 +31,3 @@ export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
   }
 });
 
-// Cliente de Supabase para uso en cliente (con anon key)
-export const createSupabaseClient = () => {
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-  
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Supabase credentials not found for client. Make sure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set.');
-  }
-  
-  return createClient(supabaseUrl, supabaseAnonKey);
-};
-

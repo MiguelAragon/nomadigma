@@ -30,9 +30,13 @@ COPY . .
 # Generate Prisma Client (NO migraciones, solo el cliente)
 RUN npx prisma generate
 
+# Accept build arguments for NEXT_PUBLIC_ variables
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 # Build Next.js application
 RUN npm run build

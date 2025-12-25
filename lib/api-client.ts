@@ -24,17 +24,9 @@ export async function api(
     } catch {
       token = null;
     }
-  } else {
-    // En client-side
-    try {
-      const { useAuth } = await import("@clerk/nextjs");
-      // Nota: En client-side, mejor usar getToken directamente
-      const { getToken } = await import("@clerk/nextjs");
-      token = await getToken();
-    } catch {
-      token = null;
-    }
   }
+  // En client-side, el token se debe pasar manualmente o usar fetch directamente
+  // No se puede usar useAuth() aquí porque no estamos en un componente React
 
   const res = await fetch(`/api${path}`, {
     ...options,

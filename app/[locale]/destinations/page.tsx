@@ -173,11 +173,7 @@ export default function DestinationsPage() {
                           fill="#dbeafe"
                           stroke="#93c5fd"
                           strokeWidth={0.5}
-                          style={{
-                            default: { fill: "#dbeafe", outline: "none" },
-                            hover: { fill: "#bfdbfe", outline: "none" },
-                            pressed: { fill: "#93c5fd", outline: "none" },
-                          }}
+                          className="hover:fill-[#bfdbfe] active:fill-[#93c5fd] transition-colors outline-none"
                         />
                       ))
                     }

@@ -79,7 +79,7 @@ export function CompactFilters({ filters, onFiltersChange }: CompactFiltersProps
   };
 
   const hasActiveFilters = 
-    filters.search || 
+    !!filters.search || 
     filters.categories.length > 0;
 
   return (

@@ -20,7 +20,7 @@ export function NavigationLoader() {
       }
 
       const target = e.target as HTMLElement;
-      const link = target.closest('a[href]');
+      const link = target.closest('a[href]') as HTMLAnchorElement | null;
       
       if (link && link.href) {
         try {

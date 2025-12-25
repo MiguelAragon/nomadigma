@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  clerkUserId   String    @unique
+  email         String    @unique
+  firstName     String?
+  lastName      String?
+  imageUrl      String?
+  bio           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastSignInAt  DateTime?
+
+  // Relations
+  posts         Post[]
+  activities    Activity[]
+
+  @@index([clerkUserId])
+  @@index([email])
+  @@map("users")
+}
+
+model Post {
+  id            String    @id @default(uuid())
+  
+  // Multilenguaje
+  titleEn       String
+  titleEs       String
+  slugEn        String    @unique
+  slugEs        String    @unique
+  contentEn     String    @db.Text
+  contentEs     String    @db.Text
+  descriptionEn String?   @db.Text
+  descriptionEs String?   @db.Text
+  
+  // Metadata
+  status        PostStatus @default(DRAFT)
+  language      String    // Idioma principal del post ('en' o 'es')
+  hashtags      String[]  // Array nativo de PostgreSQL
+  coverImage    String?   // URL de la imagen de portada
+  coverImageThumbnail String? // URL del thumbnail de la imagen de portada
+  readingTime   Int?       // Tiempo de lectura en minutos
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  creatorId     String
+  creator       User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  activities    Activity[]
+
+  // Contadores (opcionales, para performance)
+  viewCount     Int       @default(0)
+  likeCount     Int       @default(0)
+  commentCount  Int       @default(0)
+
+  @@index([creatorId])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([slugEn])
+  @@index([slugEs])
+  @@index([hashtags], type: Gin) // Índice GIN para búsquedas en arrays
+  @@map("posts")
+}
+
+model Activity {
+  id        String    @id @default(cuid())
+  type      ActivityType
+  content   String?   @db.Text // Para comentarios
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Evitar duplicados (un usuario solo puede dar like una vez)
+  @@unique([userId, postId, type])
+  @@index([userId])
+  @@index([postId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("activities")
+}
+
+enum ActivityType {
+  LIKE
+  COMMENT
+  // Fácil de extender: SHARE, BOOKMARK, etc.
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+

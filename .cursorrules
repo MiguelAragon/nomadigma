@@ -1,0 +1,69 @@
+# Reglas de Desarrollo - Nomadigma
+
+## PRINCIPIOS FUNDAMENTALES
+
+1. **NO HACER NADA QUE NO SE PIDA EXPLÍCITAMENTE**
+   - Solo implementar lo que el usuario solicita directamente
+   - No agregar features, mejoras o "optimizaciones" no solicitadas
+   - No refactorizar código que funciona correctamente
+
+2. **PREGUNTAR ANTES DE MODIFICAR**
+   - Si algo es confuso o ambiguo, PREGUNTAR primero
+   - Si hay múltiples formas de hacer algo, PREGUNTAR cuál prefiere
+   - Si no estoy seguro de entender el requerimiento, PREGUNTAR
+
+3. **NO INVENTAR NADA**
+   - No crear soluciones complejas cuando hay una simple
+   - No agregar abstracciones innecesarias
+   - No crear archivos/helpers que no se necesitan
+   - Mantener el código simple y directo
+
+4. **CÓDIGO LIMPIO Y SENCILLO**
+   - Programar como un desarrollador senior, no como junior
+   - Priorizar simplicidad sobre "elegancia"
+   - Evitar over-engineering
+   - Mantener el código fácil de entender y mantener
+
+5. **BUSCAR CLARIDAD**
+   - Si algo no está claro, preguntar
+   - Explicar brevemente qué voy a hacer antes de hacerlo
+   - Confirmar entendimiento antes de implementar
+
+## FLUJO DE TRABAJO
+
+1. Leer y entender el requerimiento
+2. Si hay dudas, PREGUNTAR
+3. Explicar brevemente la solución propuesta
+4. Esperar confirmación o aclaración
+5. Implementar SOLO lo solicitado
+6. Mantener cambios mínimos y enfocados
+
+## NO HACER
+
+- ❌ Crear archivos nuevos sin que se pidan explícitamente
+- ❌ Refactorizar código que funciona
+- ❌ Agregar "mejoras" no solicitadas
+- ❌ Inventar soluciones complejas
+- ❌ Asumir qué quiere el usuario
+- ❌ Modificar múltiples archivos sin necesidad
+
+## SÍ HACER
+
+- ✅ Preguntar si algo no está claro
+- ✅ Implementar exactamente lo solicitado
+- ✅ Mantener el código simple y directo
+- ✅ Explicar brevemente antes de implementar
+- ✅ Hacer cambios mínimos y enfocados
+
+## MANEJO DE ERRORES EN APIs
+
+- ❌ **NUNCA revelar detalles técnicos de errores al cliente**
+  - No exponer mensajes de Prisma, errores de base de datos, stack traces, etc.
+  - No usar `error.message` directamente en las respuestas de API
+  - Los errores técnicos deben ir SOLO en `console.error()` para debugging
+
+- ✅ **SIEMPRE usar mensajes genéricos y amigables**
+  - Usar mensajes como "Error al actualizar usuario. Por favor, intenta de nuevo."
+  - Los detalles técnicos solo en logs del servidor
+  - Mantener mensajes consistentes y útiles para el usuario final
+

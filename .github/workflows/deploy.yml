@@ -1,0 +1,16 @@
+name: Deploy to Nomadigma
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          npm install -g caprover
+          caprover deploy \
+            --host ${{ secrets.CAPROVER_URL }} \
+            --appName ${{ secrets.CAPROVER_APPNAME }} \
+            --appToken ${{ secrets.CAPROVER_PASSWORD }}\
+            --branch main

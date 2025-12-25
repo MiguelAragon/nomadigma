@@ -1,0 +1,86 @@
+{
+  "common": {
+    "login": "Iniciar sesión",
+    "language_not_supported": "Idioma no soportado",
+    "redirecting": "Redirigiendo a inglés...",
+    "buttons": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "add": "Añadir",
+      "remove": "Eliminar",
+      "submit": "Enviar",
+      "close": "Cerrar"
+    },
+    "labels": {
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "username": "Nombre de usuario",
+      "phone": "Teléfono",
+      "address": "Dirección"
+    },
+    "messages": {
+      "welcome": "Bienvenido",
+      "loading": "Cargando...",
+      "error": "Ocurrió un error",
+      "success": "Operación completada con éxito",
+      "confirm": "¿Está seguro?"
+    }
+  },
+  "navigation": {
+    "home": "Inicio",
+    "destinations": "Destinos",
+    "blog": "Blog",
+    "about_me": "Sobre Mí",
+    "gallery": "Galería"
+  },
+  "blog": {
+    "back_to_blog": "Volver al Blog",
+    "loading": "Cargando...",
+    "posts_found": "{{count}} post encontrado",
+    "posts_found_plural": "{{count}} posts encontrados",
+    "no_posts": "No se encontraron posts",
+    "no_posts_description": "Prueba ajustando tus filtros de búsqueda",
+    "load_more": "Cargar más posts",
+    "editor": {
+      "title": "Editor de Posts",
+      "description": "Crea y edita contenido para tu blog",
+      "basic_info": "Información Básica",
+      "title_label": "Título",
+      "slug_label": "Slug",
+      "description_label": "Descripción",
+      "content_label": "Contenido",
+      "metadata": "Metadata",
+      "hashtags": "Hashtags",
+      "add_hashtag": "Agregar",
+      "add_hashtag_placeholder": "Agregar hashtag (presiona Enter)",
+      "status": "Estado",
+      "status_draft": "Borrador",
+      "status_published": "Publicado",
+      "status_archived": "Archivado",
+      "save_draft": "Guardar como Borrador",
+      "publish": "Publicar Post",
+      "preview": "Vista Previa",
+      "edit_mode": "Editor",
+      "cover_image": "Portada",
+      "cover_image_placeholder": "Haz clic para subir una imagen de portada",
+      "reading_time": "Tiempo de lectura",
+      "reading_time_minutes": "min",
+      "reading_time_estimated": "estimado: {{minutes}} min",
+      "translate_to_english": "Traducir al inglés",
+      "translate_to_spanish": "Traducir al español"
+    },
+    "preview": {
+      "no_title": "Sin título",
+      "no_content": "No hay contenido para previsualizar"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "Bienvenido",
+      "description": "Bienvenido a Nomadigma"
+    }
+  }
+}

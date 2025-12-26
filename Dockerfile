@@ -63,12 +63,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
-# Copy Prisma Client and CLI
+# Copy Prisma Client and CLI with ALL dependencies (including WASM files)
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-# Copy all Prisma dependencies (needed for migrate deploy)
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 
 # Copy Next.js build output (standalone mode)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

@@ -10,6 +10,8 @@ if [ -z "$DATABASE_URL" ]; then
   exit 1
 fi
 
+echo "📊 DATABASE_URL is configured: ${DATABASE_URL%%:*}://****" 
+
 # Solo ejecutar migraciones en producción
 if [ "$NODE_ENV" = "production" ]; then
   echo "📦 Running Prisma migrations..."
@@ -23,6 +25,7 @@ if [ "$NODE_ENV" = "production" ]; then
     echo "✅ Migrations completed successfully!"
   else
     echo "❌ Migration failed! Exit code: $MIGRATION_STATUS"
+    echo "Check your DATABASE_URL and database connectivity"
     exit 1
   fi
 else

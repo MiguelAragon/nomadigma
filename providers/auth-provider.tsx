@@ -29,7 +29,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 function UserProviderInner({ children }: { children: ReactNode }) {
-  const { isSignedIn, isLoaded: clerkLoaded } = useClerkAuth();
+  const { isSignedIn, isLoaded: clerkLoaded, signOut } = useClerkAuth();
   const [user, setUser] = useState<DbUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,17 +46,25 @@ function UserProviderInner({ children }: { children: ReactNode }) {
       const data = await response.json();
       
       if (response.ok && data.success && data.data?.user) {
+        // Usuario validado correctamente en la DB
         setUser(data.data.user);
       } else {
+        // ERROR: Usuario de Clerk no existe/no es válido en la DB
+        // Desloguear de Clerk para que no se vea la sesión iniciada
+        console.error('Usuario no validado en la base de datos. Cerrando sesión...');
         setUser(null);
+        await signOut();
       }
     } catch (error) {
+      // ERROR: Fallo al comunicarse con la API
+      // Desloguear de Clerk para mantener consistencia
       console.error('Error fetching user:', error);
       setUser(null);
+      await signOut();
     } finally {
       setIsLoading(false);
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, signOut]);
 
   useEffect(() => {
     if (clerkLoaded) {

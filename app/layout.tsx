@@ -7,6 +7,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { NavigationProvider } from '@/providers/navigation-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { I18nProvider } from '@/providers/i18n-provider';
+import { Toaster } from '@/components/ui/sonner';
 
 const dmSans = DM_Sans({ 
   subsets: ['latin'],
@@ -57,6 +58,7 @@ export default async function RootLayout({
                   {children}
                 </NavigationProvider>
               </TooltipProvider>
+              <Toaster />
             </ThemeProvider>
           </AuthProvider>
         </I18nProvider>

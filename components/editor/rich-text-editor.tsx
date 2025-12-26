@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 // @ts-ignore - BubbleMenu is exported from a subpath export
 import { BubbleMenu } from '@tiptap/react/menus';
@@ -52,12 +52,12 @@ interface RichTextEditorProps {
   editable?: boolean;
 }
 
-export function RichTextEditor({ 
+const RichTextEditorComponent = ({ 
   content, 
   onChange, 
   placeholder = 'Escribe tu contenido aquí...',
   editable = true 
-}: RichTextEditorProps) {
+}: RichTextEditorProps) => {
   const { locale } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
@@ -628,4 +628,7 @@ export function RichTextEditor({
       </Dialog>
     </div>
   );
-}
+};
+
+// Memoizar el componente para evitar re-renders innecesarios
+export const RichTextEditor = memo(RichTextEditorComponent);

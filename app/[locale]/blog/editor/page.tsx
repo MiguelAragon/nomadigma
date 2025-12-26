@@ -101,6 +101,15 @@ export default function BlogEditorPage() {
   });
   const [shouldTranslate, setShouldTranslate] = useState(false);
 
+  // Memoizar el onChange del editor para evitar re-renders innecesarios
+  const handleContentChange = useCallback((html: string) => {
+    if (currentLanguage === 'en') {
+      setFormData(prev => ({ ...prev, contentEn: html }));
+    } else {
+      setFormData(prev => ({ ...prev, contentEs: html }));
+    }
+  }, [currentLanguage]);
+
   // Verificar autenticación
   useEffect(() => {
     if (isLoaded && !userId) {
@@ -344,12 +353,11 @@ export default function BlogEditorPage() {
         body: formDataToSend,
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || t('common.messages.error'));
-      }
-
       const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || t('common.messages.error'));
+      }
       
       toast.success(
         publish 
@@ -635,13 +643,7 @@ export default function BlogEditorPage() {
                 <div className="mb-8">
                   <RichTextEditor
                     content={getCurrentContent()}
-                    onChange={(html) => {
-                      if (currentLanguage === 'en') {
-                        setFormData(prev => ({ ...prev, contentEn: html }));
-                      } else {
-                        setFormData(prev => ({ ...prev, contentEs: html }));
-                      }
-                    }}
+                    onChange={handleContentChange}
                     placeholder={locale === 'es' 
                       ? "Escribe tu contenido aquí..." 
                       : "Write your content here..."}

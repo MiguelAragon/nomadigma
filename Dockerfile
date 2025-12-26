@@ -63,24 +63,32 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
+# Copy Prisma Client and CLI
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+# Copy all Prisma dependencies (needed for migrate deploy)
+COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
 # Copy Next.js build output (standalone mode)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy start script
+COPY --from=builder /app/start.sh ./start.sh
+
 # Set correct permissions
-RUN chown -R nextjs:nodejs /app
+RUN chown -R nextjs:nodejs /app && \
+    chmod +x /app/start.sh
 
 USER nextjs
 
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+# Health check - más tiempo de inicio para permitir que las migraciones terminen
+HEALTHCHECK --interval=15s --timeout=10s --start-period=90s --retries=5 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Ejecutar migraciones y luego iniciar el servidor
-CMD npx prisma migrate deploy && node server.js
+# Ejecutar migraciones y luego iniciar el servidor usando el script
+CMD ["/app/start.sh"]
 

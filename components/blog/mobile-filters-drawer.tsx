@@ -128,18 +128,18 @@ export function MobileFiltersDrawer({ filters, onFiltersChange, hasActiveFilters
               {BLOG_CATEGORIES.map((category) => {
                 const label = getCategoryLabel(category, locale as 'en' | 'es');
                 return (
-                  <label
-                    key={category}
-                    className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={filters.categories.includes(category)}
-                      onChange={() => toggleCategory(category)}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 size-4"
-                    />
+                <label
+                  key={category}
+                  className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.categories.includes(category)}
+                    onChange={() => toggleCategory(category)}
+                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 size-4"
+                  />
                     <span className="text-sm flex-1">{label}</span>
-                  </label>
+                </label>
                 );
               })}
             </div>
@@ -166,15 +166,15 @@ export function MobileFiltersDrawer({ filters, onFiltersChange, hasActiveFilters
                 {filters.categories.map((category) => {
                   const label = getCategoryLabel(category, locale as 'en' | 'es');
                   return (
-                    <Badge key={category} variant="secondary" className="gap-1">
+                  <Badge key={category} variant="secondary" className="gap-1">
                       {label}
-                      <button
-                        onClick={() => toggleCategory(category)}
-                        className="ml-1 hover:text-destructive"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
+                    <button
+                      onClick={() => toggleCategory(category)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
                   );
                 })}
               </div>

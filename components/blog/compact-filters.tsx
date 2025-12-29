@@ -119,14 +119,14 @@ export function CompactFilters({ filters, onFiltersChange }: CompactFiltersProps
               {BLOG_CATEGORIES.map((category) => {
                 const label = getCategoryLabel(category, locale as 'en' | 'es');
                 return (
-                  <DropdownMenuCheckboxItem
-                    key={category}
-                    checked={filters.categories.includes(category)}
-                    onCheckedChange={() => toggleCategory(category)}
-                    className="cursor-pointer"
-                  >
+                <DropdownMenuCheckboxItem
+                  key={category}
+                  checked={filters.categories.includes(category)}
+                  onCheckedChange={() => toggleCategory(category)}
+                  className="cursor-pointer"
+                >
                     {label}
-                  </DropdownMenuCheckboxItem>
+                </DropdownMenuCheckboxItem>
                 );
               })}
             </div>
@@ -167,15 +167,15 @@ export function CompactFilters({ filters, onFiltersChange }: CompactFiltersProps
           {filters.categories.map((category) => {
             const label = getCategoryLabel(category, locale as 'en' | 'es');
             return (
-              <Badge key={category} variant="secondary" className="gap-1">
+            <Badge key={category} variant="secondary" className="gap-1">
                 {label}
-                <button
-                  onClick={() => toggleCategory(category)}
-                  className="ml-1 hover:text-destructive"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
+              <button
+                onClick={() => toggleCategory(category)}
+                className="ml-1 hover:text-destructive"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
             );
           })}
 

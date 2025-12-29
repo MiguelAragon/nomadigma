@@ -190,39 +190,39 @@ export default function GalleryPage() {
               const isWide = index % 13 === 0;
               
               return (
-                <motion.div
-                  key={gallery.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
+              <motion.div
+                key={gallery.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
                   className={`group relative overflow-hidden rounded-lg bg-muted cursor-pointer
                     ${isLarge ? 'md:col-span-2 md:row-span-2' : ''}
                     ${!isLarge && isTall ? 'row-span-2' : ''}
                     ${!isLarge && !isTall && isWide ? 'md:col-span-2' : ''}
                   `}
-                  onClick={() => openLightbox(index)}
-                >
-                  {/* Imagen */}
-                  <img
-                    src={gallery.urlThumbnail || gallery.url}
-                    alt={getTitle(gallery)}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  
+                onClick={() => openLightbox(index)}
+              >
+                {/* Imagen */}
+                <img
+                  src={gallery.urlThumbnail || gallery.url}
+                  alt={getTitle(gallery)}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
+                
                   {/* Overlay con título */}
                   <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className={`p-4 md:p-6 text-left ${isLarge ? 'md:p-8' : ''}`}>
                       <div className={`font-medium text-white line-clamp-2 ${isLarge ? 'text-xl md:text-2xl' : 'text-base md:text-lg'}`}>
-                        {getTitle(gallery)}
-                      </div>
+                      {getTitle(gallery)}
+                    </div>
                       {isLarge && (
                         <div className="text-sm md:text-base text-white/80 line-clamp-2 mt-2">
                           {getContent(gallery)}
                         </div>
                       )}
-                    </div>
                   </div>
-                </motion.div>
+                </div>
+              </motion.div>
               );
             })}
           </div>

@@ -694,7 +694,7 @@ export default function BlogEditorPage() {
                           </Badge>
                         );
                       })}
-                    </div>
+                      </div>
                     {formData.hashtags.length === 0 && (
                       <p className="text-sm text-muted-foreground mt-2">
                         {locale === 'es' 

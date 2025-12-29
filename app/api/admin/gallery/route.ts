@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { APIResponse, getUser, uploadBufferToStorage, getFormValue, translatePost } from "@/lib/api-helper";
+import { APIResponse, getUser, uploadBufferToStorage, getFormValue, translatePost, validateImageFile } from "@/lib/api-helper";
 import sharp from 'sharp';
 import { randomUUID } from 'crypto';
 
@@ -127,11 +127,9 @@ export async function POST(req: Request) {
     }
 
     // Validate image
-    if (!imageFile.type || !imageFile.type.startsWith('image/')) {
-      return APIResponse(false, 'File must be an image (image/*)', null, 400);
-    }
-    if (imageFile.size > 10 * 1024 * 1024) {
-      return APIResponse(false, 'Image is too large. Maximum 10MB', null, 400);
+    const validation = validateImageFile(imageFile);
+    if (!validation.isValid) {
+      return APIResponse(false, validation.error!, null, 400);
     }
 
     // Process image

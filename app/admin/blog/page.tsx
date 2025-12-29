@@ -103,8 +103,8 @@ export default function AdminPostsPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Gestión de Posts</h1>
-          <p className="text-muted-foreground">Administra el estado de los posts del blog</p>
+        <h1 className="text-3xl font-bold mb-2">Gestión de Posts</h1>
+        <p className="text-muted-foreground">Administra el estado de los posts del blog</p>
         </div>
         <Button 
           onClick={() => router.push(`/${locale}/blog/editor`)}

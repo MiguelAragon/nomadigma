@@ -1,4 +1,4 @@
-import { getFormValue, getUser, APIResponse, uploadBufferToStorage, translatePost } from "@/lib/api-helper";
+import { getFormValue, getUser, APIResponse, uploadBufferToStorage, translatePost, validateImageFile } from "@/lib/api-helper";
 import { prisma } from "@/lib/prisma";
 import sharp from 'sharp';
 import { randomUUID } from 'crypto';
@@ -231,7 +231,7 @@ export async function POST(req: Request) {
     if(!status) return APIResponse(false, 'Field status is required', null, 400);
     if(!postId && !coverImageFile) return APIResponse(false, 'Field coverImage is required', null, 400);
 
-    if(!['DRAFT', 'PUBLISHED', 'ARCHIVED'].includes(status)) return APIResponse(false, 'Field status is invalid', null, 400);
+    if(!['DRAFT', 'PENDING_REVIEW', 'PUBLISHED', 'ARCHIVED'].includes(status)) return APIResponse(false, 'Field status is invalid', null, 400);
     if(!['es', 'en'].includes(language)) return APIResponse(false, 'Field language is invalid', null, 400);
 
     if((language === 'en' && !titleEn) || (postId && !titleEn)) return APIResponse(false, 'Field titleEn is required', null, 400);
@@ -325,8 +325,10 @@ export async function POST(req: Request) {
 
     // Validate cover Image
     if (coverImageFile) {
-      if (!coverImageFile.type || !coverImageFile.type.startsWith('image/')) return APIResponse(false, 'File must be an image (image/*)', null, 400);
-      if (coverImageFile.size > 10 * 1024 * 1024) return APIResponse(false, 'Image is too large. Maximum 10MB', null, 400);
+      const validation = validateImageFile(coverImageFile);
+      if (!validation.isValid) {
+        return APIResponse(false, validation.error!, null, 400);
+      }
 
       try {
         const extension = coverImageFile.name.split('.').pop()?.toLowerCase() || 'jpg';

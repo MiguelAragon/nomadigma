@@ -44,6 +44,29 @@ export function APIResponse(success: boolean, message: string, data?: any, statu
 
 
 /**
+ * Valida que un archivo sea una imagen válida (JPG, JPEG, PNG)
+ * @param file - Archivo a validar
+ * @returns Objeto con isValid y error si no es válido
+ */
+export function validateImageFile(file: File | null): { isValid: boolean; error?: string } {
+  if (!file) {
+    return { isValid: false, error: 'No se proporcionó ningún archivo' };
+  }
+
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  if (!file.type || !allowedTypes.includes(file.type)) {
+    return { isValid: false, error: 'Solo se permiten imágenes JPG, JPEG o PNG' };
+  }
+
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  if (file.size > maxSize) {
+    return { isValid: false, error: 'La imagen es demasiado grande. Máximo 10MB' };
+  }
+
+  return { isValid: true };
+}
+
+/**
  * Guarda un Buffer en el sistema de archivos local (public/files)
  * @param buffer - El Buffer a guardar
  * @param fileName - Nombre del archivo (con ruta, ej: "covers/image.jpg")

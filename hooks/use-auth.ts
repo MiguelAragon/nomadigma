@@ -1,14 +1,7 @@
 "use client";
 
-import { useAuth as useClerkAuth, useUser } from "@clerk/nextjs";
+import { useUserContext } from "@/providers/auth-provider";
 
 export function useAuth() {
-  const { isLoaded, isSignedIn } = useClerkAuth();
-  const { user: clerkUser } = useUser();
-
-  return {
-    isLoaded,
-    isSignedIn,
-    user: clerkUser,
-  };
+  return useUserContext();
 }

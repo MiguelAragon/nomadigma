@@ -1,14 +1,10 @@
 'use client';
 
-import { SignIn } from '@clerk/nextjs';
+import { SignUp } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
 
-export default function LoginPage() {
-  const params = useParams();
-  const locale = params.locale as string;
-
+export default function SignUpPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background con slide1 */}
@@ -78,7 +74,8 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <SignIn 
+          <SignUp 
+            routing="hash"
             appearance={{
               elements: {
                 rootBox: 'mx-auto',
@@ -92,9 +89,8 @@ export default function LoginPage() {
                 footerActionLink: 'text-indigo-600 hover:text-indigo-700',
               }
             }}
-            signUpUrl={`/${locale}/signup`}
-            redirectUrl={`/${locale}`}
-            afterSignInUrl={`/${locale}`}
+            signInUrl="/login"
+            fallbackRedirectUrl="/"
           />
         </motion.div>
       </div>

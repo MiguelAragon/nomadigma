@@ -90,8 +90,7 @@ const RichTextEditorComponent = ({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'font-bold no-underline',
-          style: 'color: #6747c7; text-decoration: none;',
+          class: 'font-bold no-underline text-[#6747c7] dark:text-[#9b87f5]',
         },
       }),
       UnderlineExtension,

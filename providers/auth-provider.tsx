@@ -15,6 +15,7 @@ interface DbUser {
   lastName: string | null;
   imageUrl: string | null;
   bio: string | null;
+  role: 'USER' | 'ADMIN';
   createdAt: string;
   updatedAt: string;
   lastSignInAt: string | null;
@@ -31,7 +32,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 function UserProviderInner({ children }: { children: ReactNode }) {
   const { isSignedIn, isLoaded: clerkLoaded, signOut } = useClerkAuth();
   const [user, setUser] = useState<DbUser | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
     if (!isSignedIn) {

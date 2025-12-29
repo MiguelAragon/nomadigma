@@ -1,38 +1,22 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "./prisma";
 import { NextResponse } from "next/server";
-import { supabase } from "./supabase";
 import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const storageContainer = process.env.STORAGE_CONTAINER as string;
+import fs from 'fs';
+import path from 'path';
 
 export async function getUser() {
-  try{
-    // const clerkUser = await currentUser();
-    // if(!clerkUser) return null;
-    const clerkUser = {id: "user_323mF7yR1VN1Tto5vOvbsM04SbB"};
+  try {
+    const clerkUser = await currentUser();
+    if (!clerkUser) return null;
 
-    let user = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkUserId: clerkUser.id },
     });
 
-
-    //prisma get user by clerk user id 
-    
-    // if (!user) return null;
-    // user = await prisma.user.create({
-    //   data: {
-    //     clerkUserId: clerkUser.id,
-    //     email: clerkUser.emailAddresses[0]?.emailAddress || '',
-    //     firstName: clerkUser.firstName || null,
-    //     lastName: clerkUser.lastName || null,
-    //     imageUrl: clerkUser.imageUrl || null,
-    //   },
-    // });
-
-    if(!user) return null;  
+    if (!user) return null;  
     return user;
-  }catch(error){
+  } catch (error) {
     console.error(error);
     return null;
   }
@@ -60,39 +44,37 @@ export function APIResponse(success: boolean, message: string, data?: any, statu
 
 
 /**
- * Sube un Buffer directamente a Supabase Storage
- * @param buffer - El Buffer a subir
+ * Guarda un Buffer en el sistema de archivos local (public/files)
+ * @param buffer - El Buffer a guardar
  * @param fileName - Nombre del archivo (con ruta, ej: "covers/image.jpg")
  * @param mimeType - Tipo MIME del archivo (ej: "image/jpeg")
- * @returns URL pública del archivo subido o null si hay error
+ * @returns URL pública del archivo guardado
  */
 export async function uploadBufferToStorage(
   buffer: Buffer,
   fileName: string,
   mimeType: string
-): Promise<string | null> {
+): Promise<string> {
   try {
-
-    // Subir imagen a Supabase Storage (upsert: true para sobreescribir si existe)
-    const { data: imageData, error: imageError } = await supabase.storage
-      .from(storageContainer)
-      .upload(fileName, buffer, {
-        contentType: mimeType,
-        upsert: true, // Sobreescribir si existe
-      });
-
-    if (imageError) {
-      console.error('Error uploading image to storage:', imageError);
-      return null;
-    }
-
-    // Obtener URL pública de la imagen
-    const { data: imageUrlData } = supabase.storage
-      .from(storageContainer)
-      .getPublicUrl(fileName);
+    // Directorio base: public/files
+    const baseDir = path.join(process.cwd(), 'public', 'files');
     
-    return imageUrlData.publicUrl;
+    // Ruta completa del archivo
+    const filePath = path.join(baseDir, fileName);
+    
+    // Crear directorios si no existen
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    
+    // Guardar el archivo
+    fs.writeFileSync(filePath, buffer);
+    
+    // Retornar la URL pública (Next.js sirve automáticamente desde /public)
+    return `/files/${fileName}`;
   } catch (error) {
+    console.error('Error uploading file to local storage:', error);
     throw new Error('Error processing buffer upload');
   }
 }

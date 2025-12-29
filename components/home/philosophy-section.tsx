@@ -9,13 +9,13 @@ import { UserPlus, FileText } from 'lucide-react';
 
 export function PhilosophySection() {
   const { locale } = useTranslation();
-  const { isSignedIn, isLoaded } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   const handleJoinClick = () => {
-    if (!isLoaded) return;
+    if (isLoading) return;
     
-    if (isSignedIn) {
+    if (user) {
       router.push(`/${locale}/blog/editor`);
     } else {
       router.push(`/${locale}/login`);
@@ -23,14 +23,14 @@ export function PhilosophySection() {
   };
 
   const joinText = locale === 'es' 
-    ? 'Únete y comienza a compartir tus experiencias apostando.'
-    : 'Join and start sharing your experiences betting.';
+    ? 'Únete y comienza a compartir tus experiencias de viaje.'
+    : 'Join and start sharing your travel experiences.';
   
-  const buttonText = isSignedIn
+  const buttonText = user
     ? (locale === 'es' ? 'Crea un post' : 'Create a post')
     : (locale === 'es' ? 'Únete a la comunidad' : 'Join to the community');
   
-  const buttonIcon = isSignedIn ? <FileText className="size-5" /> : <UserPlus className="size-5" />;
+  const buttonIcon = user ? <FileText className="size-5" /> : <UserPlus className="size-5" />;
 
   return (
     <section className="py-20 bg-muted/30 border-t border-border/50">
@@ -89,6 +89,7 @@ export function PhilosophySection() {
             <Button 
               size="lg" 
               onClick={handleJoinClick}
+              disabled={isLoading}
               className="text-lg px-8 py-6 gap-2"
             >
               {buttonIcon}

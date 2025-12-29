@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, Home, Globe, FileText, Compass, Image } from 'lucide-react';
+import { Menu, Home, Globe, FileText, Compass, Image, Shield, Users, ImageIcon, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTitle, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Logo from '@/components/logo';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
@@ -47,7 +53,7 @@ const Header = () => {
   ];
 
   const { resolvedTheme, setTheme } = useTheme();
-  const { isSignedIn, isLoaded } = useAuth();
+  const { user, isLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -105,7 +111,7 @@ const Header = () => {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-40 transition-all duration-300', 
+        'fixed top-0 left-0 right-0 z-40', 
         'bg-white dark:bg-background'
       )}
     >
@@ -138,6 +144,51 @@ const Header = () => {
                 </Link>
               </div>
             ))}
+            
+            {/* Admin Dropdown - Solo visible para ADMIN */}
+            {user && user.role === 'ADMIN' && (
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      'cursor-pointer transition-colors duration-150 relative group px-0 hover:bg-transparent',
+                      pathname?.startsWith('/admin')
+                        ? 'text-indigo-600 dark:text-indigo-400'
+                        : 'text-accent-foreground hover:text-indigo-600 dark:hover:text-indigo-400'
+                    )}
+                  >
+                    Admin
+                    <ChevronDown className="size-3 ml-1" />
+                    <span 
+                      className={`absolute -bottom-1 left-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 transition-all duration-150 ${
+                        pathname?.startsWith('/admin') ? 'w-full' : 'w-0 group-hover:w-full'
+                      }`}
+                    ></span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/users" className="flex items-center gap-2 cursor-pointer">
+                      <Users className="size-4" />
+                      {locale === 'es' ? 'Usuarios' : 'Users'}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/blog" className="flex items-center gap-2 cursor-pointer">
+                      <FileText className="size-4" />
+                      {locale === 'es' ? 'Blog' : 'Blog'}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/gallery" className="flex items-center gap-2 cursor-pointer">
+                      <ImageIcon className="size-4" />
+                      {locale === 'es' ? 'Galería' : 'Gallery'}
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </nav>
 
           {/* Mobile Navigation - Only visible on mobile */}
@@ -164,6 +215,50 @@ const Header = () => {
                       {item.title}
                     </Button>
                   ))}
+                  
+                  {/* Admin Options - Solo visible para ADMIN en mobile */}
+                  {user && user.role === 'ADMIN' && (
+                    <>
+                      <div className="border-t border-border/50 my-2"></div>
+                      <div className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        <Shield className="size-3" />
+                        Admin
+                      </div>
+                      <Button 
+                        onClick={() => handleNavClick('/admin/users')}
+                        variant="ghost"
+                        className={cn(
+                          'w-full justify-start hover:text-indigo-600 dark:hover:text-indigo-400',
+                          pathname === '/admin/users' && 'text-indigo-600 dark:text-indigo-400 font-medium'
+                        )}
+                      >
+                        <Users className="size-4 mr-2" />
+                        {locale === 'es' ? 'Usuarios' : 'Users'}
+                      </Button>
+                      <Button 
+                        onClick={() => handleNavClick('/admin/blog')}
+                        variant="ghost"
+                        className={cn(
+                          'w-full justify-start hover:text-indigo-600 dark:hover:text-indigo-400',
+                          pathname === '/admin/blog' && 'text-indigo-600 dark:text-indigo-400 font-medium'
+                        )}
+                      >
+                        <FileText className="size-4 mr-2" />
+                        {locale === 'es' ? 'Blog' : 'Blog'}
+                      </Button>
+                      <Button 
+                        onClick={() => handleNavClick('/admin/gallery')}
+                        variant="ghost"
+                        className={cn(
+                          'w-full justify-start hover:text-indigo-600 dark:hover:text-indigo-400',
+                          pathname === '/admin/gallery' && 'text-indigo-600 dark:text-indigo-400 font-medium'
+                        )}
+                      >
+                        <ImageIcon className="size-4 mr-2" />
+                        {locale === 'es' ? 'Galería' : 'Gallery'}
+                      </Button>
+                    </>
+                  )}
                 </nav>
               </DrawerContent>
             </Drawer>
@@ -175,10 +270,10 @@ const Header = () => {
           {/* Language Selector */}
           <LanguageSelector />
 
-          {/* Theme Toggle */}
+          {/* Theme Toggle - Hidden on mobile */}
           {mounted && (
             <Button 
-              className="cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground" 
+              className="cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground hidden md:flex" 
               variant="ghost" 
               size="icon" 
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
@@ -188,24 +283,28 @@ const Header = () => {
           )}
 
           {/* User Dropdown o Login Button */}
-          {isLoaded && (
-            <>
-              {isSignedIn ? (
+          {user ? (
                 <UserDropdown />
               ) : (
                 <Button 
                   size="sm" 
                   variant="default"
                   className="gap-2"
-                  asChild
+              asChild={!isLoading}
+              disabled={isLoading}
                 >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Cargando...</span>
+                </div>
+              ) : (
                   <Link href={`/${currentLocale}/login`}>
                     <LogIn className="size-4" />
                     {t('common.login')}
                   </Link>
-                </Button>
               )}
-            </>
+            </Button>
           )}
         </div>
       </div>

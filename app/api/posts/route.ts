@@ -250,7 +250,19 @@ export async function POST(req: Request) {
         if(!existingPost) return APIResponse(false, 'Post not found', null, 404);
         if(existingPost.creatorId !== user.id) return APIResponse(false, 'Unauthorized to edit this post', null, 401);
         uuid = existingPost.id;
-    }
+        
+        // Si es edición, NO permitir cambiar slugs ni títulos
+        // Usar los valores existentes del post
+        payload["titleEn"] = existingPost.titleEn;
+        payload["titleEs"] = existingPost.titleEs;
+        payload["slugEn"] = existingPost.slugEn;
+        payload["slugEs"] = existingPost.slugEs;
+    } else {
+        // Si es creación, usar los valores del formulario
+        payload["titleEn"] = titleEn;
+        payload["titleEs"] = titleEs;
+        payload["slugEn"] = slugEn;
+        payload["slugEs"] = slugEs;
 
     // Verificar que los slugs no existan en otro post
     const slugConflictWhere: any = {
@@ -259,20 +271,13 @@ export async function POST(req: Request) {
         { slugEs: slugEs || undefined }
       ]
     };
-    if(postId) {
-      slugConflictWhere.id = { not: postId };
-    }
     const slugConflict = await prisma.post.findFirst({ where: slugConflictWhere });
     if(slugConflict) return APIResponse(false, 'Post with this slug already exists', null, 400);
-
-    payload["titleEn"] = titleEn;
-    payload["titleEs"] = titleEs;
+    }
     payload["contentEn"] = contentEn;
     payload["contentEs"] = contentEs;
     payload["descriptionEn"] = descriptionEn || null;
     payload["descriptionEs"] = descriptionEs || null;
-    payload["slugEn"] = slugEn;
-    payload["slugEs"] = slugEs;
     payload["readingTime"] = readingTime || 0;
     payload["status"] = status;
     payload["language"] = language; 
@@ -305,10 +310,13 @@ export async function POST(req: Request) {
                     targetLanguage as 'en' | 'es'
                 );
                 
+                // Si es edición, NO actualizar título ni slug traducido
+                if (!postId) {
                 payload[`title${suffixTarget}`] = translation.title;
+                    payload[`slug${suffixTarget}`] = translation.slug;
+                }
                 payload[`content${suffixTarget}`] = translation.content;
                 payload[`description${suffixTarget}`] = translation.description;
-                payload[`slug${suffixTarget}`] = translation.slug;
             }
         }
     }catch(error){

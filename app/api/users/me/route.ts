@@ -26,6 +26,7 @@ export async function GET() {
           firstName: clerkUser.firstName || null,
           lastName: clerkUser.lastName || null,
           imageUrl: clerkUser.imageUrl || null,
+          role: 'USER',
           lastSignInAt: new Date(),
         },
       });
@@ -49,6 +50,7 @@ export async function GET() {
         lastName: user.lastName,
         imageUrl: user.imageUrl,
         bio: user.bio,
+        role: user.role,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
         lastSignInAt: user.lastSignInAt?.toISOString() || null,

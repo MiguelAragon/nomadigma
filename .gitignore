@@ -75,3 +75,6 @@ temp/
 
 # Development
 .development
+
+# Public files
+public/files/

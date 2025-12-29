@@ -16,6 +16,7 @@ model User {
   lastName      String?
   imageUrl      String?
   bio           String?
+  role          UserRole  @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastSignInAt  DateTime?
@@ -23,9 +24,11 @@ model User {
   // Relations
   posts         Post[]
   activities    Activity[]
+  galleries     Gallery[]
 
   @@index([clerkUserId])
   @@index([email])
+  @@index([role])
   @@map("users")
 }
 
@@ -94,6 +97,27 @@ model Activity {
   @@map("activities")
 }
 
+model Gallery {
+  id          String        @id @default(uuid())
+  titleEn     String
+  titleEs     String
+  contentEn   String        @db.Text
+  contentEs   String        @db.Text
+  url         String        // URL de la imagen original
+  urlThumbnail String?      // URL del thumbnail (opcional)
+  status      GalleryStatus @default(PUBLISHED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Relations
+  creatorId   String
+  creator     User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
+  @@index([status])
+  @@map("gallery")
+}
+
 enum ActivityType {
   LIKE
   COMMENT
@@ -102,6 +126,17 @@ enum ActivityType {
 
 enum PostStatus {
   DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum GalleryStatus {
   PUBLISHED
   ARCHIVED
 }

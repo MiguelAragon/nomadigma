@@ -8,6 +8,7 @@ import { NavigationProvider } from '@/providers/navigation-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { I18nProvider } from '@/providers/i18n-provider';
 import { Toaster } from '@/components/ui/sonner';
+import { GoogleAnalytics } from '@/components/google-analytics';
 
 const dmSans = DM_Sans({ 
   subsets: ['latin'],
@@ -31,10 +32,67 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
+  const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+  
   return (
     <html className="h-full" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var lastTouchEnd = 0;
+                document.addEventListener('touchend', function (event) {
+                  var now = (new Date()).getTime();
+                  if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                  }
+                  lastTouchEnd = now;
+                }, false);
+                
+                document.addEventListener('gesturestart', function (e) {
+                  e.preventDefault();
+                });
+                
+                document.addEventListener('gesturechange', function (e) {
+                  e.preventDefault();
+                });
+                
+                document.addEventListener('gestureend', function (e) {
+                  e.preventDefault();
+                });
+                
+                document.addEventListener('wheel', function(e) {
+                  if (e.ctrlKey) {
+                    e.preventDefault();
+                  }
+                }, { passive: false });
+                
+                document.addEventListener('keydown', function(e) {
+                  if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0')) {
+                    e.preventDefault();
+                  }
+                });
+              })();
+            `,
+          }}
+        />
+        {GA_ID && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${GA_ID}');
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
       <body
         className={cn(
@@ -47,7 +105,7 @@ export default async function RootLayout({
           <AuthProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
+              defaultTheme="light"
               storageKey="saas-theme"
               enableSystem
               disableTransitionOnChange
@@ -55,6 +113,7 @@ export default async function RootLayout({
             >
               <TooltipProvider>
                 <NavigationProvider>
+                  <GoogleAnalytics />
                   {children}
                 </NavigationProvider>
               </TooltipProvider>

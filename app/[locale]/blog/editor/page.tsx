@@ -315,6 +315,13 @@ export default function BlogEditorPage() {
     setLoading(true);
 
     try {
+      // Determinar status según rol del usuario
+      let status = 'DRAFT';
+      if (publish) {
+        // Solo ADMIN puede publicar directamente, los demás envían a revisión
+        status = dbUser?.role === 'ADMIN' ? 'PUBLISHED' : 'PENDING_REVIEW';
+      }
+      
       // Preparar FormData para enviar - enviar TODOS los campos de ambos idiomas
       const formDataToSend = new FormData();
       
@@ -334,7 +341,7 @@ export default function BlogEditorPage() {
       formDataToSend.append('readingTime', formData.readingTime.toString());
       formDataToSend.append('language', formData.language);
       formDataToSend.append('hashtags', JSON.stringify(formData.hashtags));
-      formDataToSend.append('status', publish ? 'PUBLISHED' : 'DRAFT');
+      formDataToSend.append('status', status);
       
       // Si es edición, agregar postId y translate
       if (isEditing && formData.postId) {
@@ -477,7 +484,7 @@ export default function BlogEditorPage() {
                 {/* Slug - Arriba del título, alineado a la derecha */}
                 <div className="flex justify-end mb-2">
                   <div className="flex items-center gap-2">
-                    {isSlugEditable ? (
+                    {isSlugEditable && !isEditing ? (
                       <Input
                         id="slug"
                         value={getCurrentSlug()}
@@ -492,7 +499,7 @@ export default function BlogEditorPage() {
                         <span className="text-sm text-muted-foreground">
                           /{locale}/blog/{getCurrentSlug() || 'slug'}
                         </span>
-                        {getCurrentSlug() && (
+                        {getCurrentSlug() && !isEditing && (
                           <Button
                             type="button"
                             variant="ghost"
@@ -754,7 +761,21 @@ export default function BlogEditorPage() {
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center justify-end pt-4 border-t">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleSubmit(false)}
+                    disabled={loading || translating}
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    {locale === 'es' ? 'Guardar borrador' : 'Save draft'}
+                  </Button>
+                  
                   <Button
                     type="button"
                     onClick={() => handleSubmit(true)}
@@ -767,7 +788,9 @@ export default function BlogEditorPage() {
                     )}
                     {translating 
                       ? t('common.messages.loading')
-                      : t('blog.editor.publish')
+                      : (dbUser?.role === 'ADMIN' 
+                          ? t('blog.editor.publish')
+                          : (locale === 'es' ? 'Enviar a revisión' : 'Submit for review'))
                     }
                   </Button>
                 </div>

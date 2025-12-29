@@ -85,20 +85,9 @@ function I18nProvider({ children, locale: initialLocale }: I18nProviderProps) {
     }
   }, [pathname, initialLocale]);
   
-  // Redirigir al idioma guardado si la URL no tiene locale
-  useEffect(() => {
-    if (typeof window === 'undefined' || initialLocale) return;
-    
-    const storedLocale = getLocaleFromStorage();
-    const pathLocale = getLocaleFromPathname();
-    
-    // Si hay idioma guardado y la URL no tiene locale, redirigir
-    if (storedLocale && !pathLocale) {
-      const pathParts = pathname?.split('/').filter(Boolean) || [];
-      const pathWithoutLocale = pathParts.join('/');
-      router.replace(`/${storedLocale}${pathWithoutLocale ? '/' + pathWithoutLocale : ''}`);
-    }
-  }, [pathname, initialLocale, router]);
+  // Nota:
+  // El redirect de locale se controla en `middleware.ts` con una whitelist de rutas traducibles.
+  // Si aquí también redirigimos, terminamos forzando /{locale} en rutas técnicas (auth/admin/etc).
 
   useEffect(() => {
     // Validar locale (viene de params si estamos en [locale], o del pathname si no)

@@ -230,6 +230,25 @@ body {
 /** Smooth scroll **/
 html {
   scroll-behavior: smooth;
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Deshabilitar zoom en viewport */
+* {
+  touch-action: manipulation !important;
+  -ms-touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  touch-action: manipulation !important;
+  -ms-touch-action: manipulation !important;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 @layer base {
@@ -275,7 +294,7 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   font-family: 'DM Sans', sans-serif;
   font-size: 1.25rem !important;
   line-height: 1.75 !important;
-  color: #2f1c6a !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .tiptap-editor-content strong {
@@ -300,7 +319,7 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   margin-top: 1.5rem !important;
   margin-bottom: 1rem !important;
   line-height: 1.4 !important;
-  color: #2f1c6a !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .tiptap-editor-content h2 {
@@ -309,7 +328,7 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   margin-top: 1.5rem !important;
   margin-bottom: 1rem !important;
   line-height: 1.4 !important;
-  color: #2f1c6a !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .tiptap-editor-content h3 {
@@ -318,7 +337,7 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   margin-top: 1.5rem !important;
   margin-bottom: 1rem !important;
   line-height: 1.4 !important;
-  color: #2f1c6a !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .tiptap-editor-content ul,
@@ -346,7 +365,7 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
 
 .tiptap-editor-content li {
   margin-bottom: 0.5rem !important;
-  color: #2f1c6a !important;
+  color: hsl(var(--foreground)) !important;
   font-size: 20px !important;
   line-height: 1.8 !important;
 }
@@ -355,7 +374,7 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   border-left: 4px solid #6747c7 !important;
   padding-left: 1rem !important;
   font-style: italic !important;
-  color: #2f1c6a !important;
+  color: hsl(var(--foreground)) !important;
   margin: 1.5rem 0 !important;
   font-size: 1.125rem !important;
   line-height: 1.8 !important;
@@ -390,8 +409,11 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   font-weight: 700 !important;
 }
 
+.dark .tiptap-editor-content a {
+  color: #9b87f5 !important;
+}
+
 .tiptap-editor-content a:hover {
-  color: #6747c7 !important;
   text-decoration: underline !important;
 }
 
@@ -523,7 +545,7 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   margin-bottom: 0 !important;
   margin-top: 0 !important;
   line-height: 1.8 !important;
-  color: #2f1c6a !important;
+  color: hsl(var(--foreground)) !important;
   font-size: 20px !important;
 }
 
@@ -638,4 +660,33 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
 [data-sonner-toast][data-type="info"] [data-title],
 [data-sonner-toast][data-type="info"] [data-description] {
   color: white !important;
+}
+
+/* Yet Another React Lightbox - Background transparente */
+.yarl__container {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+}
+
+/* Yet Another React Lightbox - Captions con misma transparencia */
+.yarl__slide_title {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.yarl__slide_description {
+  color: rgba(255, 255, 255, 0.9) !important;
+  opacity: 1 !important;
+}
+.yarl__slide_captions_container {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Rotating Words - Centrar en mobile, alinear izquierda en desktop */
+@media (min-width: 768px) {
+  .rotating-word-animated {
+    left: 0 !important;
+  }
+  
+  .rotating-word-animated[style*="transform"] {
+    transform: var(--rotating-word-transform, translateY(0) scale(1) rotate(0deg)) !important;
+  }
 }

@@ -8,28 +8,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, LogOut, UserCircle } from 'lucide-react';
+import { Settings, LogOut, UserCircle, Sun, Moon } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
-import { useUserContext } from '@/providers/auth-provider';
 import { SignOutButton } from '@clerk/nextjs';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePathname } from 'next/navigation';
+import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
 
 interface UserDropdownProps {
   isLight?: boolean;
 }
 
 export function UserDropdown({ isLight = false }: UserDropdownProps) {
-  const { isSignedIn } = useAuth();
-  const { user: dbUser } = useUserContext();
+  const { user: dbUser } = useAuth();
   const { locale } = useTranslation();
   const pathname = usePathname();
   const currentLocale = pathname?.split('/')[1] || locale || 'en';
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Si no está autenticado, no mostrar nada
-  if (!isSignedIn || !dbUser) {
+  if (!dbUser) {
     return null;
   }
 
@@ -115,6 +121,26 @@ export function UserDropdown({ isLight = false }: UserDropdownProps) {
             {locale === 'es' ? 'Configuración' : 'Settings'}
           </Link>
         </DropdownMenuItem>
+
+        {/* Theme Toggle - Only visible on mobile */}
+        {mounted && (
+          <DropdownMenuItem 
+            className="flex md:hidden items-center gap-2 cursor-pointer"
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+          >
+            {resolvedTheme === 'dark' ? (
+              <>
+                <Sun className="size-4" />
+                {locale === 'es' ? 'Tema Claro' : 'Light Theme'}
+              </>
+            ) : (
+              <>
+                <Moon className="size-4" />
+                {locale === 'es' ? 'Tema Oscuro' : 'Dark Theme'}
+              </>
+            )}
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuSeparator />
 

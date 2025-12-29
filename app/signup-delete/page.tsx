@@ -20,9 +20,7 @@ export default function SignUpPage() {
               card: 'shadow-lg',
             }
           }}
-          signInUrl={`/${locale}/login`}
-          redirectUrl={`/${locale}`}
-          afterSignUpUrl={`/${locale}`}
+          signInUrl={`/login`}
         />
       </div>
       <Footer />

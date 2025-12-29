@@ -1,6 +1,12 @@
 {
   "schemaVersion": 2,
   "dockerfilePath": "./Dockerfile",
+  "persistentDirectories": [
+    {
+      "path": "/app/public/files",
+      "label": "uploaded_files"
+    }
+  ],
   "dockerBuildArgs": {
     "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "$$cap_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
   }

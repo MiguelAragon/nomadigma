@@ -14,12 +14,13 @@ export function GoogleAnalytics() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.gtag) return;
+    const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+    if (typeof window === 'undefined' || !window.gtag || !GA_ID) return;
 
     const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
     
     // Track page view con información adicional
-    window.gtag('config', process.env.NEXT_PUBLIC_GA_ID!, {
+    window.gtag('config', GA_ID, {
       page_path: url,
       page_title: document.title,
       page_location: window.location.href,

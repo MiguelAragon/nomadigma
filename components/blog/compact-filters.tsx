@@ -22,6 +22,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { BLOG_CATEGORIES, getCategoryLabel, getCategoryValue } from '@/config/categories';
 
 export interface CompactFiltersState {
   search: string;
@@ -33,31 +34,11 @@ interface CompactFiltersProps {
   onFiltersChange: (filters: CompactFiltersState) => void;
 }
 
-const CATEGORIES = {
-  es: [
-    'Viajes',
-    'Fotografía',
-    'Gastronomía',
-    'Aventuras',
-    'Cultura',
-    'Naturaleza',
-  ],
-  en: [
-    'Travel',
-    'Photography',
-    'Gastronomy',
-    'Adventures',
-    'Culture',
-    'Nature',
-  ],
-};
-
 export function CompactFilters({ filters, onFiltersChange }: CompactFiltersProps) {
   const { locale } = useTranslation();
-  const { isSignedIn } = useAuth();
+  const { user } = useAuth();
   const pathname = usePathname();
   const currentLocale = pathname?.split('/')[1] || locale || 'en';
-  const categories = CATEGORIES[locale as 'es' | 'en'] || CATEGORIES.es;
   const updateFilters = (newFilters: Partial<CompactFiltersState>) => {
     const updatedFilters = { ...filters, ...newFilters };
     onFiltersChange(updatedFilters);
@@ -135,22 +116,25 @@ export function CompactFilters({ filters, onFiltersChange }: CompactFiltersProps
             <DropdownMenuLabel>{locale === 'es' ? 'Seleccionar categorías' : 'Select categories'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="max-h-[220px] overflow-y-auto scrollbar-thin">
-              {categories.map((category) => (
-                <DropdownMenuCheckboxItem
-                  key={category}
-                  checked={filters.categories.includes(category)}
-                  onCheckedChange={() => toggleCategory(category)}
-                  className="cursor-pointer"
-                >
-                  {category}
-                </DropdownMenuCheckboxItem>
-              ))}
+              {BLOG_CATEGORIES.map((category) => {
+                const label = getCategoryLabel(category, locale as 'en' | 'es');
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={category}
+                    checked={filters.categories.includes(category)}
+                    onCheckedChange={() => toggleCategory(category)}
+                    className="cursor-pointer"
+                  >
+                    {label}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
 
         {/* Create Post Button - Only when logged in */}
-        {isSignedIn && (
+        {user && (
           <Button asChild variant="default" className="bg-indigo-600 hover:bg-indigo-700 text-white">
             <Link href={`/${currentLocale}/blog/editor`} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
@@ -180,17 +164,20 @@ export function CompactFilters({ filters, onFiltersChange }: CompactFiltersProps
             </Badge>
           )}
 
-          {filters.categories.map((category) => (
-            <Badge key={category} variant="secondary" className="gap-1">
-              {category}
-              <button
-                onClick={() => toggleCategory(category)}
-                className="ml-1 hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
+          {filters.categories.map((category) => {
+            const label = getCategoryLabel(category, locale as 'en' | 'es');
+            return (
+              <Badge key={category} variant="secondary" className="gap-1">
+                {label}
+                <button
+                  onClick={() => toggleCategory(category)}
+                  className="ml-1 hover:text-destructive"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            );
+          })}
 
           <Button
             variant="ghost"

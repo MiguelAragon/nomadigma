@@ -31,6 +31,7 @@ import moment from 'moment';
 import { PageLoader } from '@/components/page-loader';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/use-translation';
+import { BLOG_CATEGORIES, getCategoryLabel } from '@/config/categories';
 
 type EditorMode = 'edit' | 'preview';
 
@@ -657,47 +658,49 @@ export default function BlogEditorPage() {
                   />
                 </div>
 
-                {/* Hashtags y Author Info - Al final */}
+                {/* Categorías y Author Info - Al final */}
                 <div className="pt-8 border-t border-border/50">
-                  {/* Hashtags */}
+                  {/* Categorías */}
                   <div className="mb-6">
-                    <div className="flex gap-2 items-center">
-                      <Input
-                        id="hashtags"
-                        value={hashtagInput}
-                        onChange={(e) => setHashtagInput(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddHashtag();
-                          }
-                        }}
-                        placeholder={t('blog.editor.add_hashtag_placeholder')}
-                        className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleAddHashtag}
-                      >
-                        {t('blog.editor.add_hashtag')}
-                      </Button>
-                    </div>
-                    {formData.hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {formData.hashtags.map((tag) => (
+                    <Label className="text-sm font-medium mb-3 block">
+                      {locale === 'es' ? 'Categorías' : 'Categories'}
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {BLOG_CATEGORIES.map((category) => {
+                        const isSelected = formData.hashtags.includes(category);
+                        const label = getCategoryLabel(category, locale as 'en' | 'es');
+                        return (
                           <Badge
-                            key={tag}
-                            variant="outline"
-                            className="cursor-pointer"
-                            onClick={() => handleRemoveHashtag(tag)}
+                            key={category}
+                            variant={isSelected ? "default" : "outline"}
+                            className={`cursor-pointer transition-colors ${
+                              isSelected 
+                                ? 'bg-indigo-600 hover:bg-indigo-700 text-white' 
+                                : 'hover:bg-muted'
+                            }`}
+                            onClick={() => {
+                              if (isSelected) {
+                                handleRemoveHashtag(category);
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  hashtags: [...prev.hashtags, category],
+                                }));
+                              }
+                            }}
                           >
-                            {tag}
-                            <X className="h-3 w-3 ml-1" />
+                            {label}
+                            {isSelected && <X className="h-3 w-3 ml-1" />}
                           </Badge>
-                        ))}
-                      </div>
+                        );
+                      })}
+                    </div>
+                    {formData.hashtags.length === 0 && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {locale === 'es' 
+                          ? 'Selecciona al menos una categoría' 
+                          : 'Select at least one category'}
+                      </p>
                     )}
                   </div>
 

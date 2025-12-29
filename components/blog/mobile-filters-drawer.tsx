@@ -19,25 +19,7 @@ import {
 } from 'lucide-react';
 import { CompactFiltersState } from './compact-filters';
 import { useTranslation } from '@/hooks/use-translation';
-
-const CATEGORIES = {
-  es: [
-    'Viajes',
-    'Fotografía',
-    'Gastronomía',
-    'Aventuras',
-    'Cultura',
-    'Naturaleza',
-  ],
-  en: [
-    'Travel',
-    'Photography',
-    'Gastronomy',
-    'Adventures',
-    'Culture',
-    'Nature',
-  ],
-};
+import { BLOG_CATEGORIES, getCategoryLabel } from '@/config/categories';
 
 interface MobileFiltersDrawerProps {
   filters: CompactFiltersState;
@@ -48,7 +30,6 @@ interface MobileFiltersDrawerProps {
 export function MobileFiltersDrawer({ filters, onFiltersChange, hasActiveFilters }: MobileFiltersDrawerProps) {
   const { locale } = useTranslation();
   const [isOpen, setIsOpen] = React.useState(false);
-  const categories = CATEGORIES[locale as 'es' | 'en'] || CATEGORIES.es;
 
   const updateFilters = (newFilters: Partial<CompactFiltersState>) => {
     onFiltersChange({ ...filters, ...newFilters });
@@ -144,20 +125,23 @@ export function MobileFiltersDrawer({ filters, onFiltersChange, hasActiveFilters
               )}
             </label>
             <div className="space-y-2">
-              {categories.map((category) => (
-                <label
-                  key={category}
-                  className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.categories.includes(category)}
-                    onChange={() => toggleCategory(category)}
-                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 size-4"
-                  />
-                  <span className="text-sm flex-1">{category}</span>
-                </label>
-              ))}
+              {BLOG_CATEGORIES.map((category) => {
+                const label = getCategoryLabel(category, locale as 'en' | 'es');
+                return (
+                  <label
+                    key={category}
+                    className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={filters.categories.includes(category)}
+                      onChange={() => toggleCategory(category)}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 size-4"
+                    />
+                    <span className="text-sm flex-1">{label}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
@@ -179,17 +163,20 @@ export function MobileFiltersDrawer({ filters, onFiltersChange, hasActiveFilters
                     </button>
                   </Badge>
                 )}
-                {filters.categories.map((category) => (
-                  <Badge key={category} variant="secondary" className="gap-1">
-                    {category}
-                    <button
-                      onClick={() => toggleCategory(category)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
+                {filters.categories.map((category) => {
+                  const label = getCategoryLabel(category, locale as 'en' | 'es');
+                  return (
+                    <Badge key={category} variant="secondary" className="gap-1">
+                      {label}
+                      <button
+                        onClick={() => toggleCategory(category)}
+                        className="ml-1 hover:text-destructive"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
           )}

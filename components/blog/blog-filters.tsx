@@ -37,12 +37,14 @@ const SORT_OPTIONS = [
 ];
 
 const CATEGORIES = [
-  'Viajes',
-  'Fotografía',
-  'Gastronomía',
+  'Experiencias',
   'Aventuras',
-  'Cultura',
-  'Naturaleza',
+  'Guías',
+  'Tips de viaje',
+  'Cultura e Historia',
+  'Fotografía',
+  'Aprendizaje',
+  'Reflexiones',
 ];
 
 const POPULAR_HASHTAGS = [

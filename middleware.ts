@@ -32,9 +32,14 @@ export default clerkMiddleware((auth, req: NextRequest) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals, static files, and /files directory
-    '/((?!_next|files|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    /*
+     * Match all request paths except for:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)  
+     * - favicon.ico (favicon file)
+     * - files (uploaded files directory)
+     * But DO include /api routes
+     */
+    '/((?!_next/static|_next/image|favicon.ico|files/).*)',
   ],
 };

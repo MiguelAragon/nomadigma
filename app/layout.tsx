@@ -25,6 +25,29 @@ export const metadata: Metadata = {
     default: 'Nomadigma - Blog de viajes y nómada digital',
   },
   description: 'Explora el mundo como nómada digital. Guías de viaje, tips y experiencias.',
+  openGraph: {
+    title: 'Nomadigma - Blog de viajes y nómada digital',
+    description: 'Explora el mundo como nómada digital. Guías de viaje, tips y experiencias.',
+    url: 'https://nomadigma.com',
+    siteName: 'Nomadigma',
+    locale: 'es_ES',
+    type: 'website',
+    images: [
+      {
+        url: 'https://nomadigma.com/nomadigma.png',
+        width: 1200,
+        height: 630,
+        alt: 'Nomadigma',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nomadigma - Blog de viajes y nómada digital',
+    description: 'Explora el mundo como nómada digital. Guías de viaje, tips y experiencias.',
+    images: ['https://nomadigma.com/nomadigma.png'],
+    creator: '@nomadigma',
+  },
 };
 
 export default async function RootLayout({

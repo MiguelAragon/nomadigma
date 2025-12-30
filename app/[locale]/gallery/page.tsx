@@ -7,7 +7,7 @@ import { Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
-import { Captions } from 'yet-another-react-lightbox/plugins';
+import { Captions, Zoom } from 'yet-another-react-lightbox/plugins';
 import 'yet-another-react-lightbox/plugins/captions.css';
 
 interface GalleryItem {
@@ -42,6 +42,7 @@ export default function GalleryPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   useEffect(() => {
     fetchGalleries(pagination.page, true);
@@ -114,11 +115,34 @@ export default function GalleryPage() {
   const getContent = (item: GalleryItem) => locale === 'en' ? item.contentEn : item.contentEs;
 
   // Preparar slides para el lightbox (usar allGalleries para tener todas las imágenes cargadas)
-  const slides = allGalleries.map((gallery) => ({
-    src: gallery.url,
-    title: getTitle(gallery),
-    description: getContent(gallery),
-  }));
+  const slides = allGalleries.map((gallery) => {
+    const description = getContent(gallery);
+    return {
+      src: gallery.url,
+      title: getTitle(gallery),
+      description: description ? (
+        <div 
+          onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+          className={`cursor-pointer gallery-description ${
+            isDescriptionExpanded ? 'max-h-[60vh] overflow-y-auto' : 'max-h-[100px] overflow-hidden'
+          }`}
+          style={{
+            fontSize: '1.1rem',
+            color: 'rgba(255, 255, 255, 0.9)',
+            lineHeight: '1.6',
+            textShadow: '0 2px 6px rgba(0,0,0,0.8)',
+          }}
+        >
+          {description}
+          {!isDescriptionExpanded && description.length > 150 && (
+            <div className="mt-2 text-sm text-white/70">
+              {locale === 'es' ? '(Click para ver más)' : '(Click to see more)'}
+            </div>
+          )}
+        </div>
+      ) : undefined,
+    };
+  });
 
   if (isLoading) {
     return (
@@ -260,11 +284,22 @@ export default function GalleryPage() {
         close={() => setLightboxOpen(false)}
         index={lightboxIndex}
         slides={slides}
-        plugins={[Captions]}
+        plugins={[Captions, Zoom]}
         captions={{
           showToggle: false,
           descriptionTextAlign: 'start',
-          descriptionMaxLines: 10,
+          descriptionMaxLines: isDescriptionExpanded ? undefined : 3,
+        }}
+        zoom={{
+          maxZoomPixelRatio: 3,
+          zoomInMultiplier: 2,
+          doubleTapDelay: 300,
+          doubleClickDelay: 300,
+          doubleClickMaxStops: 2,
+          keyboardMoveDistance: 50,
+          wheelZoomDistanceFactor: 100,
+          pinchZoomDistanceFactor: 100,
+          scrollToZoom: true,
         }}
         styles={{
           container: { backgroundColor: 'rgba(0, 0, 0, 0.2)' },
@@ -275,10 +310,7 @@ export default function GalleryPage() {
             textShadow: '0 2px 8px rgba(0,0,0,0.8)',
           },
           captionsDescription: {
-            fontSize: '1.1rem',
-            color: 'rgba(255, 255, 255, 0.9)',
-            lineHeight: '1.6',
-            textShadow: '0 2px 6px rgba(0,0,0,0.8)',
+            // Estilos manejados por el componente personalizado
           },
           captionsTitleContainer: {
             background: 'rgba(0,0,0,0.85)',
@@ -293,6 +325,7 @@ export default function GalleryPage() {
           view: ({ index }) => {
             if (index !== undefined) {
               handleLightboxIndexChange(index);
+              setIsDescriptionExpanded(false); // Resetear al cambiar de imagen
             }
           },
         }}

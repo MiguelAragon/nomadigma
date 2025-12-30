@@ -92,11 +92,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         publishedTime: post.publishedAt?.toISOString(),
         modifiedTime: post.updatedAt?.toISOString(),
         authors: [authorName],
-        images: post.coverImage ? [
+        images: post.coverImageThumbnail ? [
           {
-            url: post.coverImage,
-            width: 1200,
-            height: 630,
+            url: post.coverImageThumbnail,
+            width: 500,
+            height: 300,
             alt: title || 'Imagen del post',
           }
         ] : [],
@@ -108,7 +108,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         card: 'summary_large_image',
         title: title || 'Post | Nomadigma',
         description: metaDescription || 'Artículo de Nomadigma',
-        images: post.coverImage ? [post.coverImage] : [],
+        images: post.coverImageThumbnail ? [post.coverImageThumbnail] : [],
         creator: '@nomadigma',
       },
 

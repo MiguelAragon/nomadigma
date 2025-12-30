@@ -81,12 +81,8 @@ function UserProviderInner({ children }: { children: ReactNode }) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const clerkProps = process.env.NEXT_PUBLIC_CLERK_DOMAIN 
-    ? { domain: process.env.NEXT_PUBLIC_CLERK_DOMAIN }
-    : {};
-
   return (
-    <ClerkProvider {...clerkProps}>
+    <ClerkProvider>
       <UserProviderInner>
       {children}
       </UserProviderInner>

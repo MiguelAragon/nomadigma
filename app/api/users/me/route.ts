@@ -5,20 +5,36 @@ import sharp from 'sharp';
 
 export async function GET() {
   try {
-    // Obtener usuario de Clerk
     const clerkUser = await currentUser();
-    
-    if (!clerkUser)return APIResponse(false, 'No autorizado', null, 401);
+    if (!clerkUser) return APIResponse(false, 'No autorizado', null, 401);
 
-    // Buscar usuario en la base de datos
+    const email = clerkUser.emailAddresses?.[0]?.emailAddress || '';
+
+    // 1. Buscar por clerkUserId
     let user = await prisma.user.findUnique({
       where: { clerkUserId: clerkUser.id },
     });
 
-    // Si no existe, crearlo con la información de Clerk
+    // 2. Si no encuentra, buscar por email
+    if (!user && email) {
+      user = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      // Si encuentra por email pero con diferente clerkUserId, actualizar
+      if (user && user.clerkUserId !== clerkUser.id) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            clerkUserId: clerkUser.id,
+            lastSignInAt: new Date(),
+          },
+        });
+      }
+    }
+
+    // 3. Si aún no existe, crear
     if (!user) {
-      const email = clerkUser.emailAddresses?.[0]?.emailAddress || '';
-      
       user = await prisma.user.create({
         data: {
           clerkUserId: clerkUser.id,
@@ -30,9 +46,8 @@ export async function GET() {
           lastSignInAt: new Date(),
         },
       });
-    } else {
-      // Si existe, solo actualizar lastSignInAt
-      // NO actualizar imageUrl, firstName, lastName desde Clerk (solo se usan al crear)
+    } else if (user.clerkUserId === clerkUser.id) {
+      // 4. Si existe con el clerkUserId correcto, actualizar lastSignInAt
       user = await prisma.user.update({
         where: { id: user.id },
         data: {

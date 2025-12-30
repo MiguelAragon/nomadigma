@@ -15,9 +15,9 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "hsuxrxebwdweihrgjuth.supabase.co",
+        hostname: "storage.nomadigma.com",
         port: "",
-        pathname: "/storage/v1/object/public/**",
+        pathname: "/**",
       },
     ],
 	},

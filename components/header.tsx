@@ -117,8 +117,8 @@ const Header = () => {
     >
       <div className={cn("container mx-auto px-6 py-4 flex items-center justify-between")}  >
         {/* Left Side: Logo + Navigation */}
-        <div className="flex items-center gap-8">
-          <Link href={`/${currentLocale}`}>
+        <div className="flex items-center gap-4 md:gap-8 min-w-0">
+          <Link href={`/${currentLocale}`} className="shrink-0">
             <Logo />
           </Link>
           
@@ -266,7 +266,7 @@ const Header = () => {
         </div>
 
         {/* Right Side: Language + Theme + User */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Language Selector */}
           <LanguageSelector />
 

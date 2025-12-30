@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const clerkUser = await currentUser();
     if (!clerkUser) return APIResponse(false, 'No autorizado', null, 401);
-
+    
     const email = clerkUser.emailAddresses?.[0]?.emailAddress || '';
 
     // 1. Buscar por clerkUserId

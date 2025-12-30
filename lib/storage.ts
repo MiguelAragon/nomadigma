@@ -7,6 +7,7 @@ import https from 'https';
 function validateS3Config() {
   const requiredVars = {
     S3_ENDPOINT: process.env.S3_ENDPOINT,
+    S3_PUBLIC_URL: process.env.S3_PUBLIC_URL,
     S3_REGION: process.env.S3_REGION,
     S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
     S3_SECRET_KEY: process.env.S3_SECRET_KEY,
@@ -23,6 +24,7 @@ function validateS3Config() {
 
   return {
     endpoint: requiredVars.S3_ENDPOINT!,
+    publicUrl: requiredVars.S3_PUBLIC_URL!,
     region: requiredVars.S3_REGION!,
     accessKey: requiredVars.S3_ACCESS_KEY!,
     secretKey: requiredVars.S3_SECRET_KEY!,
@@ -81,8 +83,8 @@ export async function uploadBufferToStorage(
 
     await s3Client.send(command);
     
-    // Construir la URL pública del archivo
-    const publicUrl = `${config.endpoint}/${config.bucketName}/${fileName}`;
+    // Construir la URL pública del archivo usando S3_PUBLIC_URL
+    const publicUrl = `${config.publicUrl}/${config.bucketName}/${fileName}`;
     
     return publicUrl;
   } catch (error) {

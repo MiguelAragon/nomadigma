@@ -189,7 +189,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     author: {
       name: `${post.creator.firstName || ''} ${post.creator.lastName || ''}`.trim() || 'Anonymous',
       avatar: post.creator.imageUrl || undefined,
-      bio: undefined,
+      bio: post.creator.bio || undefined,
     },
     categories: [],
     hashtags: post.hashtags || [],

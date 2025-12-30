@@ -3,7 +3,7 @@
   "dockerfilePath": "./Dockerfile",
   "persistentDirectories": [
     {
-      "path": "/app/public/files",
+      "path": "./app/public/files",
       "label": "uploaded_files"
     }
   ],

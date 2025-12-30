@@ -2,8 +2,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "./prisma";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import fs from 'fs';
-import path from 'path';
+export { uploadBufferToStorage } from './storage';
+
 
 export async function getUser() {
   try {
@@ -64,42 +64,6 @@ export function validateImageFile(file: File | null): { isValid: boolean; error?
   }
 
   return { isValid: true };
-}
-
-/**
- * Guarda un Buffer en el sistema de archivos local (public/files)
- * @param buffer - El Buffer a guardar
- * @param fileName - Nombre del archivo (con ruta, ej: "covers/image.jpg")
- * @param mimeType - Tipo MIME del archivo (ej: "image/jpeg")
- * @returns URL pública del archivo guardado
- */
-export async function uploadBufferToStorage(
-  buffer: Buffer,
-  fileName: string,
-  mimeType: string
-): Promise<string> {
-  try {
-    // Directorio base: public/files
-    const baseDir = path.join(process.cwd(), 'public', 'files');
-    
-    // Ruta completa del archivo
-    const filePath = path.join(baseDir, fileName);
-    
-    // Crear directorios si no existen
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    
-    // Guardar el archivo
-    fs.writeFileSync(filePath, buffer);
-    
-    // Retornar la URL pública (Next.js sirve automáticamente desde /public)
-    return `/files/${fileName}`;
-  } catch (error) {
-    console.error('Error uploading file to local storage:', error);
-    throw new Error('Error processing buffer upload');
-  }
 }
 
 

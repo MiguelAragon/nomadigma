@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useApiClient } from '@/hooks/use-api';
 import { toast } from 'sonner';
+import { Container } from '@/components/ui/container';
 
 interface User {
   id: string;
@@ -73,22 +74,22 @@ export default function UsersPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <Container className="py-8">
         <p className="text-center">Cargando...</p>
-      </div>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <Container className="py-8">
         <p className="text-center text-red-500">{error}</p>
-      </div>
+      </Container>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Container className="py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Gestión de Usuarios</h1>
         <p className="text-muted-foreground">Administra los usuarios y sus roles en el sistema</p>
@@ -195,7 +196,7 @@ export default function UsersPage() {
           </button>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
 

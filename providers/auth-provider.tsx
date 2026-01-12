@@ -81,8 +81,19 @@ function UserProviderInner({ children }: { children: ReactNode }) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // Usar las URLs de las variables de entorno o las por defecto
+  const signInUrl = process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL || "/login";
+  const signUpUrl = process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL || "/signup";
+  const afterSignInUrl = process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL || "/";
+  const afterSignUpUrl = process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL || "/";
+
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInUrl={signInUrl}
+      signUpUrl={signUpUrl}
+      afterSignInUrl={afterSignInUrl}
+      afterSignUpUrl={afterSignUpUrl}
+    >
       <UserProviderInner>
       {children}
       </UserProviderInner>

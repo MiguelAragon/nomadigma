@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, Home, Globe, FileText, Compass, Image, Shield, Users, ImageIcon, ChevronDown } from 'lucide-react';
+import { Menu, Home, Globe, FileText, Compass, Image, Shield, Users, ImageIcon, ChevronDown, ShoppingCart, ShoppingBag, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTitle, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import {
@@ -21,6 +21,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { LogIn } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePathname } from 'next/navigation';
+import { useStoreClient } from '@/app/(public)/store/components/context';
+import { Badge } from '@/components/ui/badge';
 
 const Header = () => {
   const { t, locale, i18n: i18nInstance } = useTranslation();
@@ -45,11 +47,11 @@ const Header = () => {
   }, [i18nInstance, locale, currentLocale, t]);
   
   const navItems = [
-    { title: t('navigation.home'), path: `/${currentLocale}`, icon: Home },
-    { title: t('navigation.destinations'), path: `/${currentLocale}/destinations`, icon: Globe },
-    { title: t('navigation.blog'), path: `/${currentLocale}/blog`, icon: FileText },
-    // { title: t('navigation.about_me'), path: `/${currentLocale}/about-me`, icon: Compass },
-    { title: t('navigation.gallery'), path: `/${currentLocale}/gallery`, icon: Image },
+    { title: t('navigation.home'), path: `/`, icon: Home },
+    { title: t('navigation.destinations'), path: `/destinations`, icon: Globe },
+    { title: t('navigation.blog'), path: `/blog`, icon: FileText },
+    // { title: t('navigation.about_me'), path: `/about-me`, icon: Compass },
+    { title: t('navigation.gallery'), path: `/gallery`, icon: Image },
   ];
 
   const { resolvedTheme, setTheme } = useTheme();
@@ -58,6 +60,15 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [mounted, setMounted] = useState(false);
+  
+  // Get cart context (may be undefined if not in store context, but we handle it)
+  let cartContext;
+  try {
+    cartContext = useStoreClient();
+  } catch {
+    // Context not available, that's okay
+    cartContext = null;
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -99,13 +110,16 @@ const Header = () => {
   const isActiveItem = (path: string) => {
     if (typeof window === 'undefined' || !pathname) return false;
     
-    // Si el path es el home (solo el locale), debe coincidir exactamente
-    if (path === `/${currentLocale}` || path === `/${currentLocale}/`) {
-      return pathname === `/${currentLocale}` || pathname === `/${currentLocale}/`;
+    // Normalizar pathname removiendo locale si existe
+    const normalizedPathname = pathname.replace(/^\/(en|es)/, '') || '/';
+    
+    // Si el path es el home, debe coincidir exactamente
+    if (path === `/` || path === ``) {
+      return normalizedPathname === `/` || normalizedPathname === ``;
     }
     
-    // Para otros paths, verificar si el pathname empieza con el path
-    return pathname === path || pathname.startsWith(path + '/');
+    // Para otros paths, verificar si el pathname normalizado empieza con el path
+    return normalizedPathname === path || normalizedPathname.startsWith(path + '/');
   };
 
   return (
@@ -118,7 +132,7 @@ const Header = () => {
       <div className={cn("container mx-auto px-6 py-4 flex items-center justify-between")}  >
         {/* Left Side: Logo + Navigation */}
         <div className="flex items-center gap-4 md:gap-8 min-w-0">
-          <Link href={`/${currentLocale}`} className="shrink-0">
+          <Link href={`/`} className="shrink-0">
             <Logo />
           </Link>
           
@@ -265,20 +279,111 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Right Side: Language + Theme + User */}
+        {/* Right Side: Different layout for store vs non-store */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Language Selector */}
-          <LanguageSelector />
+          {/* Language Selector - Only show when user is NOT logged in */}
+          {!user && <LanguageSelector />}
+          {pathname?.startsWith('/store') ? (
+            /* Store Layout: User -> Wishlist -> Cart (with badge and total) */
+            <>
+              {/* User Dropdown o Login Button */}
+              {user ? (
+                <UserDropdown />
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  className="gap-2"
+                  asChild={!isLoading}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Cargando...</span>
+                    </div>
+                  ) : (
+                    <Link href={`/login`}>
+                      <LogIn className="size-4" />
+                      {t('common.login')}
+                    </Link>
+                  )}
+                </Button>
+              )}
 
-          {/* Theme Toggle - Hidden on mobile */}
-          {mounted && (
+              {/* Wishlist */}
+              {cartContext && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground"
+                  onClick={() => cartContext.showWishlistSheet()}
+                >
+                  <Heart className="size-5" />
+                </Button>
+              )}
+
+              {/* Cart with badge and total */}
+              {cartContext && (
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "flex items-center gap-1 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground",
+                    cartContext.cartItemsCount > 0 ? "p-0 h-auto" : "size-icon"
+                  )}
+                  onClick={() => cartContext.showCartSheet()}
+                >
+                  <div className="relative">
+                    <ShoppingCart className="size-5" />
+                    {cartContext.cartItemsCount > 0 && (
+                      <Badge
+                        className="absolute -top-2 -right-2"
+                        variant="success"
+                        size="xs"
+                        shape="circle"
+                      >
+                        {cartContext.cartItemsCount}
+                      </Badge>
+                    )}
+                  </div>
+                  {cartContext.cartItemsCount > 0 && (
+                    <div className="flex flex-col">
+                      <span className="text-xs font-medium text-secondary-foreground">
+                        Total
+                      </span>
+                      <span className="text-xs font-medium text-foreground">
+                        ${cartContext.cartTotal.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                </Button>
+              )}
+            </>
+          ) : (
+            /* Non-Store Layout: Store Button -> Language -> Theme -> User */
+            <>
+              {/* Store Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground hover:bg-transparent gap-2"
+                asChild
+              >
+                <Link href="/store">
+                  <ShoppingCart className="size-5" />
+                  {t('navigation.store')}
+                </Link>
+              </Button>
+
+              {/* Theme Toggle - Only show if user NOT logged in */}
+              {mounted && !user && (
             <Button 
               className="cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground hidden md:flex" 
               variant="ghost" 
               size="icon" 
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             >
-              {resolvedTheme === 'dark' ? <Sun className="size-4"/> : <Moon className="size-4"/>}
+                  {resolvedTheme === 'dark' ? <Sun className="size-5"/> : <Moon className="size-5"/>}
             </Button>
           )}
 
@@ -299,12 +404,14 @@ const Header = () => {
                   <span>Cargando...</span>
                 </div>
               ) : (
-                  <Link href={`/${currentLocale}/login`}>
+                  <Link href={`/login`}>
                     <LogIn className="size-4" />
                     {t('common.login')}
                   </Link>
               )}
             </Button>
+              )}
+            </>
           )}
         </div>
       </div>

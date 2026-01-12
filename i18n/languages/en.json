@@ -34,7 +34,8 @@
     "destinations": "Destinations",
     "blog": "Blog",
     "about_me": "About Me",
-    "gallery": "Gallery"
+    "gallery": "Gallery",
+    "store": "Store"
   },
   "blog": {
     "back_to_blog": "Back to Blog",

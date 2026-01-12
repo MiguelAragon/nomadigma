@@ -7,6 +7,8 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { NavigationProvider } from '@/providers/navigation-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { I18nProvider } from '@/providers/i18n-provider';
+import { StoreClientProvider } from '@/app/(public)/store/components/context';
+import { StoreClientWrapper } from '@/app/(public)/store/components/wrapper';
 import { Toaster } from '@/components/ui/sonner';
 import { GoogleAnalytics } from '@/components/google-analytics';
 
@@ -136,8 +138,12 @@ export default async function RootLayout({
             >
               <TooltipProvider>
                 <NavigationProvider>
+                  <StoreClientProvider>
+                    <StoreClientWrapper>
                   <GoogleAnalytics />
                   {children}
+                    </StoreClientWrapper>
+                  </StoreClientProvider>
                 </NavigationProvider>
               </TooltipProvider>
               <Toaster />

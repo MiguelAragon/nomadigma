@@ -30,7 +30,7 @@ export function LatestPostsSection() {
         // Map posts to include full slug path
         const mappedPosts = newPosts.map((post: BlogPost) => ({
           ...post,
-          slug: `/${locale}/blog/${post.slug}`,
+          slug: `/blog/${post.slug}`,
           id: parseInt(post.id.toString()) || Math.random(),
         }));
 
@@ -69,7 +69,7 @@ export function LatestPostsSection() {
               className="gap-2"
               asChild
             >
-              <Link href={`/${locale}/blog`}>
+              <Link href={`/blog`}>
                 {viewMoreText}
                 <ArrowRight className="size-4" />
               </Link>

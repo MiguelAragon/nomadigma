@@ -29,12 +29,6 @@ function I18nProvider({ children, locale: initialLocale }: I18nProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
   
-  // Obtener locale de la URL
-  const getLocaleFromPathname = () => {
-    const pathLocale = pathname?.split('/')[1];
-    return pathLocale && I18N_LANGUAGES.some(lang => lang.code === pathLocale) ? pathLocale : null;
-  };
-  
   // Obtener locale del storage
   const getLocaleFromStorage = () => {
     if (typeof window === 'undefined') return null;
@@ -42,15 +36,14 @@ function I18nProvider({ children, locale: initialLocale }: I18nProviderProps) {
     return stored && I18N_LANGUAGES.some(lang => lang.code === stored) ? stored : null;
   };
   
-  // Si hay initialLocale (provider interno), usarlo directamente
-  // Si no, usar el de la URL o el guardado o 'en'
-  const localeToUse = initialLocale || getLocaleFromPathname() || getLocaleFromStorage() || 'en';
+  // Usar initialLocale si existe, sino localStorage, sino español por defecto
+  const localeToUse = initialLocale || getLocaleFromStorage() || 'es';
   
   const [isI18nInitialized, setIsI18nInitialized] = useState(false);
   const [currentLocale, setCurrentLocale] = useState<string>(localeToUse);
   const [isUnsupported, setIsUnsupported] = useState(false);
 
-  // Función para cambiar idioma y navegar a la nueva URL
+  // Función para cambiar idioma (solo actualiza localStorage e i18n, sin cambiar URL ni recargar)
   const changeLanguage = (code: string) => {
     const isValidLocale = I18N_LANGUAGES.some(lang => lang.code === code);
     
@@ -64,43 +57,22 @@ function I18nProvider({ children, locale: initialLocale }: I18nProviderProps) {
       localStorage.setItem('language', code);
     }
 
-    // Cambiar el idioma en i18n
-    i18n.changeLanguage(code);
+    // Cambiar el idioma en i18n (esto actualiza automáticamente todos los componentes)
+    i18n.changeLanguage(code).then(() => {
     setCurrentLocale(code);
-
-    // Construir nueva URL con el locale cambiado
-    const pathParts = pathname?.split('/').filter(Boolean) || [];
-    const pathWithoutLocale = pathParts.length > 1 ? pathParts.slice(1).join('/') : '';
-    const newPath = `/${code}${pathWithoutLocale ? '/' + pathWithoutLocale : ''}`;
-      router.push(newPath);
+    });
   };
 
-  // Sincronizar: URL → localStorage (cuando cargas la página)
   useEffect(() => {
-    if (typeof window === 'undefined' || initialLocale) return;
-    
-    const pathLocale = getLocaleFromPathname();
-    if (pathLocale) {
-      localStorage.setItem('language', pathLocale);
-    }
-  }, [pathname, initialLocale]);
-  
-  // Nota:
-  // El redirect de locale se controla en `middleware.ts` con una whitelist de rutas traducibles.
-  // Si aquí también redirigimos, terminamos forzando /{locale} en rutas técnicas (auth/admin/etc).
-
-  useEffect(() => {
-    // Validar locale (viene de params si estamos en [locale], o del pathname si no)
+    // Validar locale
     if (localeToUse) {
       const isValidLocale = I18N_LANGUAGES.some(lang => lang.code === localeToUse);
       
       if (!isValidLocale) {
         setIsUnsupported(true);
-        setCurrentLocale('en');
-        // Redirigir a inglés si el idioma no está soportado
-        if (pathname && pathname.startsWith(`/${localeToUse}`)) {
-          const path = pathname.replace(/^\/[^/]+/, '/en');
-          router.replace(path);
+        setCurrentLocale('es'); // Usar español por defecto si el idioma no está soportado
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('language', 'es');
         }
         return;
       }
@@ -122,8 +94,8 @@ function I18nProvider({ children, locale: initialLocale }: I18nProviderProps) {
         .use(initReactI18next)
         .init({
           resources,
-          fallbackLng: 'en',
-          lng: localeToUse, // Usar locale (de params o pathname)
+          fallbackLng: 'es',
+          lng: localeToUse, // Usar locale de localStorage o español por defecto
           debug: process.env.NODE_ENV === 'development',
 
           interpolation: {
@@ -155,7 +127,7 @@ function I18nProvider({ children, locale: initialLocale }: I18nProviderProps) {
             });
           } else {
             // Verificar que las traducciones estén cargadas
-            const lang = localeToUse || i18n.language || 'en';
+            const lang = localeToUse || i18n.language || 'es';
             if (i18n.hasResourceBundle(lang, 'translation')) {
               setIsI18nInitialized(true);
             } else {
@@ -197,7 +169,7 @@ function I18nProvider({ children, locale: initialLocale }: I18nProviderProps) {
     return () => {
       i18n.off('languageChanged', handleLanguageChange);
     };
-  }, [localeToUse, router, pathname, currentLocale]);
+  }, [localeToUse, currentLocale]);
 
   // Sincronizar locale cuando cambia
   useEffect(() => {
@@ -214,20 +186,16 @@ function I18nProvider({ children, locale: initialLocale }: I18nProviderProps) {
     return null;
   }
 
-  // Mostrar mensaje si el idioma no está soportado
+    // Mostrar mensaje si el idioma no está soportado
   if (isUnsupported) {
-    // Usar el locale que intentaron acceder o el fallback
-    const attemptedLocale = initialLocale || 'en';
-    const isSpanishAttempt = attemptedLocale === 'es';
-    
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">
-            {isSpanishAttempt ? 'Idioma no soportado' : 'Language not supported'}
+            Idioma no soportado
           </h1>
           <p className="text-muted-foreground">
-            {isSpanishAttempt ? 'Redirigiendo a inglés...' : 'Redirecting to English...'}
+            Usando español por defecto...
           </p>
         </div>
       </div>
@@ -253,7 +221,7 @@ export const useLanguage = () => {
     // Fallback si se usa fuera del provider
   const currentLanguage = I18N_LANGUAGES.find((lang) => lang.code === i18n.language) || I18N_LANGUAGES[0];
     return {
-      locale: i18n.language || 'en',
+      locale: i18n.language || 'es',
       language: currentLanguage,
       changeLanguage: (code: string) => {
     i18n.changeLanguage(code);

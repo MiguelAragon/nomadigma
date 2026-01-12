@@ -16,9 +16,9 @@ export function PhilosophySection() {
     if (isLoading) return;
     
     if (user) {
-      router.push(`/${locale}/blog/editor`);
+      router.push(`/blog/editor`);
     } else {
-      router.push(`/${locale}/login`);
+      router.push(`/login`);
     }
   };
 

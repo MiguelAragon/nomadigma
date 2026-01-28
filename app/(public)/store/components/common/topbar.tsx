@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
+import { UserDropdownMenu } from '@/components/user-dropdown-menu';
 import { Heart, Search, UserCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ export function StoreClientTopbar() {
               <Input type="text" className="px-7" placeholder="Search shop" />
               <Badge
                 className="absolute top-1/2 -translate-y-1/2 end-2 gap-1"
-                appearance="light"
+                variant="secondary"
                 size="sm"
               >
                 ⌘ K
@@ -38,10 +38,8 @@ export function StoreClientTopbar() {
           trigger={
             <Button
               variant="ghost"
-              size="lg"
-              mode="icon"
-              shape="circle"
-              className="hover:text-primary"
+              size="icon"
+              className="hover:text-primary rounded-full"
             >
               <UserCircle className="size-5!" />
             </Button>
@@ -50,11 +48,9 @@ export function StoreClientTopbar() {
 
         <Button
           variant="ghost"
-          size="lg"
-          mode="icon"
-          shape="circle"
+          size="icon"
           onClick={showWishlistSheet}
-          className="hover:text-primary"
+          className="hover:text-primary rounded-full"
         >
           <Heart className="size-5!" />
         </Button>

@@ -5,9 +5,9 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Wrapper para Select que desactiva el modal por defecto para evitar bloqueo de scroll
-const Select = ({ modal = false, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => (
-  <SelectPrimitive.Root modal={modal} {...props} />
+// Wrapper para Select
+const Select = (props: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => (
+  <SelectPrimitive.Root {...props} />
 );
 
 const SelectGroup = SelectPrimitive.Group;

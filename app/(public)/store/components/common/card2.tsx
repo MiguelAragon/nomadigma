@@ -113,7 +113,6 @@ export function Card2({ badge, logo, title, total, star, label, productId, produ
             <Badge
               size="sm"
               variant="success"
-              shape="circle"
               className="rounded-full gap-1"
             >
               <Star

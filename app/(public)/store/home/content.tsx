@@ -7,7 +7,6 @@ import {
   Info,
   NewArrivals,
   PopularSneakers,
-  Promotions,
   Search,
   SpecialOffers,
 } from './components';

@@ -97,9 +97,8 @@ export function StoreClientWishlistSheet({
                       <div className="flex items-center flex-wrap gap-3">
                         <Badge
                           size="sm"
-                          variant="warning"
-                          shape="circle"
-                          className="gap-1"
+                          variant="success"
+                          className="gap-1 rounded-full"
                         >
                           <Star className="text-white" fill="currentColor" />
                           {item.star}
@@ -127,8 +126,7 @@ export function StoreClientWishlistSheet({
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
-                          mode="icon"
+                          size="icon"
                           className="justify-center"
                         >
                           <TrashIcon />

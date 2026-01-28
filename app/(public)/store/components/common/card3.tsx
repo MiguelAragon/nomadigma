@@ -91,8 +91,7 @@ export function Card3({
             <div className="flex items-center flex-wrap gap-3">
               <Badge
                 size="sm"
-                variant="warning"
-                shape="circle"
+                variant="success"
                 className="rounded-full gap-1"
               >
                 <Star

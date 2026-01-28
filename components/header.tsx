@@ -380,10 +380,9 @@ const Header = () => {
                   <div className="relative mr-2">
                     <ShoppingCart className="size-5" />
                     <Badge
-                      className="absolute -top-2 -right-2"
+                      className="absolute -top-2 -right-2 rounded-full"
                       variant="success"
                       size="xs"
-                      shape="circle"
                     >
                       {count}
                     </Badge>

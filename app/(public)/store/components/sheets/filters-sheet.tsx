@@ -120,8 +120,7 @@ export function StoreClientFiltersSheet({ trigger }: { trigger: ReactNode }) {
                   <Badge
                     key={index}
                     size="sm"
-                    shape="circle"
-                    className="border-border bg-accent/50 px-2 py-2.5"
+                    className="border-border bg-accent/50 px-2 py-2.5 rounded-full"
                   >
                     {item.label}
                   </Badge>
@@ -158,7 +157,7 @@ export function StoreClientFiltersSheet({ trigger }: { trigger: ReactNode }) {
           <Button variant="outline" className="justify-center basis-1/2">
             Reset
           </Button>
-          <Button variant="primary" className="justify-center basis-1/2">
+          <Button variant="default" className="justify-center basis-1/2">
             Apple
           </Button>
         </SheetFooter>

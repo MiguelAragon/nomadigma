@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { Card, CardContent } from '@/components/ui/card';
 import { useStoreClient } from '@/app/(public)/store/components/context';
@@ -12,8 +12,6 @@ interface ICard1Item {
 type ICard1Items = Array<ICard1Item>;
 
 export function Card1() {
-  const { showProductDetailsSheet } = useStoreClient();
-
   const items: ICard1Items = [
     { logo: '1.png', brand: 'Nike' },
     { logo: '2.png', brand: 'Adidas' },
@@ -24,25 +22,53 @@ export function Card1() {
     { logo: '7.png', brand: 'Sketchers' },
   ];
 
-  const renderItem = (item: ICard1Item, index: number) => (
-    <Card key={index}>
-      <CardContent className="flex flex-col items-center justify-center pb-0">
-        <div
-          onClick={() => showProductDetailsSheet('productid')}
-          className="hover:text-primary text-sm font-medium text-mono cursor-pointer"
-        >
-          {item.brand}
-        </div>
+  const renderItem = (item: ICard1Item, index: number) => {
+    const ImageWithPlaceholder = () => {
+      const [imageLoaded, setImageLoaded] = useState(false);
+      const [imageError, setImageError] = useState(false);
 
-        <img
-          src={toAbsoluteUrl(`/media/store/client/600x600/${item.logo}`)}
-          onClick={() => showProductDetailsSheet('productid')}
-          className="cursor-pointer h-[100px] shrink-0"
-          alt="image"
-        />
-      </CardContent>
-    </Card>
-  );
+      return (
+        <div className="relative h-[100px] w-full flex items-center justify-center">
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 shimmer"></div>
+          )}
+
+          {!imageError && (
+            <img
+              src={toAbsoluteUrl(`/media/store/client/600x600/${item.logo}`)}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => {
+                setImageError(true);
+                setImageLoaded(true);
+              }}
+              className={`h-[100px] shrink-0 group-hover:scale-110 transition-transform duration-500 ease-out object-contain ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              alt="image"
+            />
+          )}
+
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+              <div className="text-muted-foreground text-xs">No image</div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    return (
+      <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+        <CardContent className="flex flex-col items-center justify-center pb-0">
+          <div className="hover:text-primary text-sm font-medium text-mono group-hover:text-primary transition-colors duration-300">
+            {item.brand}
+          </div>
+
+          <ImageWithPlaceholder />
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <Fragment>

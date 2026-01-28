@@ -1,6 +1,8 @@
 {
   "common": {
     "login": "Login",
+    "see_more": "See more",
+    "add_to_card": "Add to Card",
     "language_not_supported": "Language not supported",
     "redirecting": "Redirecting to English...",
     "buttons": {

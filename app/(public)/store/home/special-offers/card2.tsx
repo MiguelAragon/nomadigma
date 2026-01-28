@@ -1,11 +1,9 @@
 'use client';
 
-import { ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useStoreClient } from '@/app/(public)/store/components/context';
 
 interface ICard2Props {
   bgColor: string;
@@ -13,6 +11,7 @@ interface ICard2Props {
   title: string;
   total: string;
   logo: string;
+  productSlug?: string;
 }
 
 export function Card2({
@@ -21,11 +20,22 @@ export function Card2({
   title,
   total,
   logo,
+  productSlug,
 }: ICard2Props) {
-  const { showCartSheet } = useStoreClient();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const handleCardClick = () => {
+    if (productSlug) {
+      window.location.href = `/store/products/${productSlug}`;
+    }
+  };
 
   return (
-    <Card className={`h-full ${bgColor} ${borderColor}`}>
+    <Card 
+      className={`h-full ${bgColor} ${borderColor} overflow-hidden hover:shadow-lg transition-shadow duration-300 group cursor-pointer`}
+      onClick={handleCardClick}
+    >
       <CardContent className="flex flex-col items-center justify-center px-5 pb-0">
         <div className="mb-3.5">
           <Badge size="sm" variant="destructive" className="uppercase">
@@ -33,22 +43,33 @@ export function Card2({
           </Badge>
         </div>
 
-        <span className="text-base font-medium text-mono mb-3">{title}</span>
-        <Button
-          size="sm"
-          variant="outline"
-          className="mb-2.5"
-          onClick={showCartSheet}
-        >
-          <ShoppingCart /> Add to Card
-        </Button>
-        <span className="text-sm font-medium text-mono">{total}</span>
+        <span className="text-base font-medium text-mono mb-3 group-hover:text-primary transition-colors duration-300">{title}</span>
+        <span className="text-sm font-medium text-mono mb-3">{total}</span>
 
-        <img
-          src={toAbsoluteUrl(`/media/store/client/600x600/${logo}`)}
-          className="size-48"
-          alt="image"
-        />
+        <div className="relative overflow-hidden">
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 shimmer"></div>
+          )}
+          {!imageError && (
+            <img
+              src={toAbsoluteUrl(`/media/store/client/600x600/${logo}`)}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => {
+                setImageError(true);
+                setImageLoaded(true);
+              }}
+              className={`size-48 group-hover:scale-110 transition-transform duration-500 ease-out object-cover ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              alt="image"
+            />
+          )}
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+              <div className="text-muted-foreground text-xs">No image</div>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

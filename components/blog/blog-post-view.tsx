@@ -14,7 +14,7 @@ interface BlogPostViewProps {
   coverImage?: string;
   date: string;
   readingTime: number;
-  hashtags: string[];
+  categories: string[];
   author: {
     name: string;
     avatar?: string;
@@ -32,7 +32,7 @@ function BlogPostViewComponent({
   coverImage,
   date,
   readingTime,
-  hashtags,
+  categories,
   author,
   slug,
   locale,
@@ -124,15 +124,15 @@ function BlogPostViewComponent({
         {...(animate && { transition: { duration: 0.6, delay: 0.6 } })}
         className="pt-8 pb-8 border-t border-border/50"
       >
-        {/* Tags */}
-        {hashtags.length > 0 && (
+        {/* Categories */}
+        {categories.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
-            {hashtags.map((hashtag) => (
+            {categories.map((category) => (
               <Badge 
-                key={hashtag} 
+                key={category} 
                 className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 border-purple-200 dark:border-purple-700"
               >
-                {hashtag}
+                {category}
               </Badge>
             ))}
           </div>

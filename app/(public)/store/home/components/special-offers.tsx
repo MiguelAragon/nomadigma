@@ -5,18 +5,15 @@ import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card1 } from '@/app/(public)/store/home/special-offers/card1';
 import { Card2 } from '@/app/(public)/store/home/special-offers/card2';
+import { useTranslation } from '@/hooks/use-translation';
 
 export function SpecialOffers() {
+  const { locale } = useTranslation();
+  
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-4">
-        <span className="text-lg font-medium text-mono">Special Offers</span>
-
-        <Button mode="link" asChild>
-          <Link href="/account/home/get-started" className="text-xs">
-            See All <ChevronRight />
-          </Link>
-        </Button>
+        <span className="text-lg font-medium text-mono">{locale === 'es' ? 'Ofertas Especiales' : 'Special Offers'}</span>
       </div>
 
       <div className="grid xl:grid-cols-2 gap-5 mb-2">

@@ -18,7 +18,6 @@ interface BlogPost {
     bio?: string;
   };
   categories: string[];
-  hashtags: string[];
   attachments: Array<{
     id: number;
     url: string;
@@ -139,7 +138,7 @@ export function BlogPostContent({ post, locale, translations }: BlogPostContentP
             coverImage={post.attachments[0]?.url}
             date={post.publishedAt}
             readingTime={readingTime}
-            hashtags={post.hashtags}
+            categories={post.categories}
             author={{
               name: post.author.name,
               avatar: post.author.avatar,

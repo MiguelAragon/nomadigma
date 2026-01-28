@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { BlogPostContent } from './blog-post-content';
+import { getBlogCategoryLabel } from '@/config/categories';
 
 interface PageProps {
   params: Promise<{
@@ -74,6 +75,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       metaDescription = textContent.substring(0, 160) + '...';
     }
 
+    // Traducir categorías para metadata
+    const categoryLabels = (post.categories || []).map(cat => 
+      getBlogCategoryLabel(cat, locale as 'en' | 'es')
+    );
+
     // URL canónica
     const canonicalUrl = `https://nomadigma.com/blog/${slug}`;
 
@@ -81,7 +87,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: title || 'Post | Nomadigma',
       description: metaDescription || 'Artículo de Nomadigma',
       authors: [{ name: authorName }],
-      keywords: post.hashtags?.join(', ') || '',
+      keywords: categoryLabels.join(', ') || '',
       
       // Open Graph para redes sociales (WhatsApp, Telegram, Facebook, etc.)
       openGraph: {
@@ -102,7 +108,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             alt: title || 'Imagen del post',
           }
         ] : [],
-        tags: post.hashtags || [],
+        tags: categoryLabels,
       },
 
       // Twitter Card
@@ -141,7 +147,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         'article:author': authorName,
         'article:published_time': post.publishedAt?.toISOString() || '',
         'article:modified_time': post.updatedAt?.toISOString() || '',
-        'article:tag': post.hashtags?.join(',') || '',
+        'article:tag': categoryLabels.join(',') || '',
       },
     };
   } catch (error) {
@@ -181,6 +187,11 @@ export default async function BlogPostPage({ params }: PageProps) {
   const slugValue = locale === 'en' ? post.slugEn : post.slugEs;
   const description = locale === 'en' ? post.descriptionEn : post.descriptionEs;
   const content = locale === 'en' ? post.contentEn : post.contentEs;
+  
+  // Traducir categorías para mostrar
+  const categoryLabels = (post.categories || []).map(cat => 
+    getBlogCategoryLabel(cat, locale as 'en' | 'es')
+  );
     
   const mappedPost = {
     id: post.id,
@@ -195,8 +206,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       avatar: post.creator.imageUrl || undefined,
       bio: post.creator.bio || undefined,
     },
-    categories: [],
-    hashtags: post.hashtags || [],
+    categories: categoryLabels,
     attachments: post.coverImage ? [{
       id: 0,
       url: post.coverImage,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, Home, Globe, FileText, Compass, Image, Shield, Users, ImageIcon, ChevronDown, ShoppingCart, ShoppingBag, Heart } from 'lucide-react';
+import { Menu, Home, Globe, FileText, Compass, Image, Shield, Users, ImageIcon, ChevronDown, ShoppingCart, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTitle, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import {
@@ -48,7 +48,6 @@ const Header = () => {
   
   const navItems = [
     { title: t('navigation.home'), path: `/`, icon: Home },
-    { title: t('navigation.destinations'), path: `/destinations`, icon: Globe },
     { title: t('navigation.blog'), path: `/blog`, icon: FileText },
     // { title: t('navigation.about_me'), path: `/about-me`, icon: Compass },
     { title: t('navigation.gallery'), path: `/gallery`, icon: Image },
@@ -69,6 +68,69 @@ const Header = () => {
     // Context not available, that's okay
     cartContext = null;
   }
+
+  // Read cart from localStorage when not in store context
+  const [cartItemsCount, setCartItemsCount] = useState(0);
+  const [cartTotal, setCartTotal] = useState(0);
+
+  useEffect(() => {
+    if (!cartContext && typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('nomadigma_cart');
+        if (stored) {
+          const cartItems = JSON.parse(stored);
+          const count = cartItems.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0);
+          const total = cartItems.reduce((sum: number, item: { total: string; quantity: number }) => sum + parseFloat(item.total) * item.quantity, 0);
+          setCartItemsCount(count);
+          setCartTotal(total);
+        } else {
+          setCartItemsCount(0);
+          setCartTotal(0);
+        }
+      } catch (error) {
+        console.error('Error reading cart from localStorage:', error);
+        setCartItemsCount(0);
+        setCartTotal(0);
+      }
+    } else if (cartContext) {
+      setCartItemsCount(cartContext.cartItemsCount);
+      setCartTotal(cartContext.cartTotal);
+    }
+  }, [cartContext, pathname]);
+
+  // Listen to storage changes to update cart count when outside store context
+  useEffect(() => {
+    if (!pathname?.startsWith('/store') && typeof window !== 'undefined') {
+      const handleStorageChange = () => {
+        try {
+          const stored = localStorage.getItem('nomadigma_cart');
+          if (stored) {
+            const cartItems = JSON.parse(stored);
+            const count = cartItems.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0);
+            const total = cartItems.reduce((sum: number, item: { total: string; quantity: number }) => sum + parseFloat(item.total) * item.quantity, 0);
+            setCartItemsCount(count);
+            setCartTotal(total);
+          } else {
+            setCartItemsCount(0);
+            setCartTotal(0);
+          }
+        } catch (error) {
+          console.error('Error reading cart from localStorage:', error);
+        }
+      };
+
+      // Listen to storage events (from other tabs/windows)
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Also listen to custom events (from same tab)
+      window.addEventListener('cartUpdated', handleStorageChange);
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('cartUpdated', handleStorageChange);
+      };
+    }
+  }, [pathname]);
 
   useEffect(() => {
     setMounted(true);
@@ -195,6 +257,12 @@ const Header = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link href="/admin/products" className="flex items-center gap-2 cursor-pointer">
+                      <ShoppingBag className="size-4" />
+                      {locale === 'es' ? 'Productos' : 'Products'}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link href="/admin/gallery" className="flex items-center gap-2 cursor-pointer">
                       <ImageIcon className="size-4" />
                       {locale === 'es' ? 'Galería' : 'Gallery'}
@@ -261,6 +329,17 @@ const Header = () => {
                         {locale === 'es' ? 'Blog' : 'Blog'}
                       </Button>
                       <Button 
+                        onClick={() => handleNavClick('/admin/products')}
+                        variant="ghost"
+                        className={cn(
+                          'w-full justify-start hover:text-indigo-600 dark:hover:text-indigo-400',
+                          pathname === '/admin/products' && 'text-indigo-600 dark:text-indigo-400 font-medium'
+                        )}
+                      >
+                        <ShoppingBag className="size-4 mr-2" />
+                        {locale === 'es' ? 'Productos' : 'Products'}
+                      </Button>
+                      <Button 
                         onClick={() => handleNavClick('/admin/gallery')}
                         variant="ghost"
                         className={cn(
@@ -279,90 +358,48 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Right Side: Different layout for store vs non-store */}
+        {/* Right Side: Store Button always visible */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Language Selector - Only show when user is NOT logged in */}
           {!user && <LanguageSelector />}
-          {pathname?.startsWith('/store') ? (
-            /* Store Layout: User -> Wishlist -> Cart (with badge and total) */
-            <>
-              {/* User Dropdown o Login Button */}
-              {user ? (
-                <UserDropdown />
-              ) : (
-                <Button 
-                  size="sm" 
-                  variant="default"
-                  className="gap-2"
-                  asChild={!isLoading}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Cargando...</span>
-                    </div>
-                  ) : (
-                    <Link href={`/login`}>
-                      <LogIn className="size-4" />
-                      {t('common.login')}
-                    </Link>
-                  )}
-                </Button>
-              )}
-
-              {/* Wishlist */}
-              {cartContext && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground"
-                  onClick={() => cartContext.showWishlistSheet()}
-                >
-                  <Heart className="size-5" />
-                </Button>
-              )}
-
-              {/* Cart with badge and total */}
-              {cartContext && (
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "flex items-center gap-1 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground",
-                    cartContext.cartItemsCount > 0 ? "p-0 h-auto" : "size-icon"
-                  )}
-                  onClick={() => cartContext.showCartSheet()}
-                >
-                  <div className="relative">
+          
+          {/* Botón unificado: Carrito si hay productos, Tienda si no hay */}
+          {(() => {
+            const hasItems = cartContext ? cartContext.cartItemsCount > 0 : cartItemsCount > 0;
+            const total = cartContext ? cartContext.cartTotal : cartTotal;
+            const count = cartContext ? cartContext.cartItemsCount : cartItemsCount;
+            
+            return hasItems ? (
+              /* Carrito con badge y total cuando hay productos */
+              <Button
+                variant="ghost"
+                className="flex items-center gap-1 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground p-0 h-auto"
+                asChild
+              >
+                <Link href="/store/checkout">
+                  <div className="relative mr-2">
                     <ShoppingCart className="size-5" />
-                    {cartContext.cartItemsCount > 0 && (
-                      <Badge
-                        className="absolute -top-2 -right-2"
-                        variant="success"
-                        size="xs"
-                        shape="circle"
-                      >
-                        {cartContext.cartItemsCount}
-                      </Badge>
-                    )}
+                    <Badge
+                      className="absolute -top-2 -right-2"
+                      variant="success"
+                      size="xs"
+                      shape="circle"
+                    >
+                      {count}
+                    </Badge>
                   </div>
-                  {cartContext.cartItemsCount > 0 && (
-                    <div className="flex flex-col">
-                      <span className="text-xs font-medium text-secondary-foreground">
-                        Total
-                      </span>
-                      <span className="text-xs font-medium text-foreground">
-                        ${cartContext.cartTotal.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-                </Button>
-              )}
-            </>
-          ) : (
-            /* Non-Store Layout: Store Button -> Language -> Theme -> User */
-            <>
-              {/* Store Button */}
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-secondary-foreground">
+                      Total
+                    </span>
+                    <span className="text-xs font-medium text-foreground">
+                      ${total.toFixed(2)}
+                    </span>
+                  </div>
+                </Link>
+              </Button>
+            ) : (
+              /* Botón Tienda con icono de bolsa cuando NO hay productos */
               <Button
                 variant="ghost"
                 size="sm"
@@ -370,20 +407,22 @@ const Header = () => {
                 asChild
               >
                 <Link href="/store">
-                  <ShoppingCart className="size-5" />
-                  {t('navigation.store')}
+                  <ShoppingBag className="size-5" />
+                  {locale === 'es' ? 'Tienda' : 'Store'}
                 </Link>
               </Button>
+            );
+          })()}
 
-              {/* Theme Toggle - Only show if user NOT logged in */}
-              {mounted && !user && (
+          {/* Theme Toggle - Only show if user NOT logged in and NOT in store */}
+          {mounted && !user && !pathname?.startsWith('/store') && (
             <Button 
               className="cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground hidden md:flex" 
               variant="ghost" 
               size="icon" 
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             >
-                  {resolvedTheme === 'dark' ? <Sun className="size-5"/> : <Moon className="size-5"/>}
+              {resolvedTheme === 'dark' ? <Sun className="size-5"/> : <Moon className="size-5"/>}
             </Button>
           )}
 
@@ -410,8 +449,6 @@ const Header = () => {
                   </Link>
               )}
             </Button>
-              )}
-            </>
           )}
         </div>
       </div>

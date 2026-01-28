@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Clock } from 'lucide-react';
 import type { BlogPost } from '@/components/blog/post-card';
+import { getBlogCategoryLabel } from '@/config/categories';
 
 export function LatestPostsSection() {
   const { t, locale } = useTranslation();
@@ -80,7 +81,7 @@ export function LatestPostsSection() {
         {/* Horizontal Scroll Container */}
         <div className="relative">
           <div className="overflow-x-auto scrollbar-hide pb-4 -mx-6 px-6">
-            <div className="flex gap-6 min-w-max">
+            <div className="flex gap-6 min-w-max items-stretch">
               {loading ? (
                 // Show 5 skeletons while loading
                 Array.from({ length: 5 }).map((_, index) => (
@@ -103,11 +104,11 @@ export function LatestPostsSection() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="w-[380px] flex-shrink-0"
+                    className="w-[380px] flex-shrink-0 flex"
                   >
-                    <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow group cursor-pointer flex flex-col">
-                      <Link href={post.slug}>
-                        <div className="relative aspect-video overflow-hidden">
+                    <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow group cursor-pointer flex flex-col w-full">
+                      <Link href={post.slug} className="flex flex-col h-full">
+                        <div className="relative aspect-video overflow-hidden flex-shrink-0">
                           {post.attachments && post.attachments.length > 0 ? (
                             <img
                               src={post.attachments[0].url}
@@ -117,11 +118,21 @@ export function LatestPostsSection() {
                           ) : (
                             <div className="w-full h-full bg-muted" />
                           )}
+                          {/* Gradient overlay at bottom for better readability */}
+                          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 via-black/30 to-transparent pointer-events-none" />
                           {post.categories && post.categories.length > 0 && (
-                            <div className="absolute top-4 left-4">
-                              <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-                                {post.categories[0]}
-                              </Badge>
+                            <div className="absolute bottom-4 left-4 flex flex-wrap gap-2 max-w-[calc(100%-80px)]">
+                              {post.categories.map((categoryKey, idx) => {
+                                const categoryLabel = getBlogCategoryLabel(categoryKey, locale as 'en' | 'es');
+                                return (
+                                  <Badge 
+                                    key={idx}
+                                    className="bg-white/75 dark:bg-gray-900/75 text-gray-900 dark:text-gray-100 backdrop-blur-sm shadow-lg border-0"
+                                  >
+                                    {categoryLabel}
+                                  </Badge>
+                                );
+                              })}
                             </div>
                           )}
                           {post.readingTime && (
@@ -131,20 +142,22 @@ export function LatestPostsSection() {
                             </div>
                           )}
                         </div>
-                        <div className="px-6 pt-6 flex flex-col flex-grow">
-                          <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                        <div className="px-6 pt-6 flex flex-col flex-grow min-h-0">
+                          <h3 className="text-xl font-bold mb-2 line-clamp-2">
                             {post.title}
                           </h3>
-                          <p className="text-muted-foreground text-sm line-clamp-3 mb-4 flex-grow">
+                          <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
                             {post.excerpt}
-                            <span className="flex items-center text-indigo-600 dark:text-indigo-400 font-medium text-sm mt-2 group-hover:gap-2 transition-all">
+                          </p>
+                          <div className="mb-4">
+                            <span className="flex items-center text-indigo-600 dark:text-indigo-400 font-medium text-sm group-hover:gap-2 transition-all">
                               {locale === 'es' ? 'Leer más' : 'Read more'}
                               <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform ml-1" />
                             </span>
-                          </p>
+                          </div>
                           
-                          {/* Author */}
-                          <div className="flex items-center pt-2 pb-6 border-t border-border/30">
+                          {/* Author - Always at bottom */}
+                          <div className="flex items-center pt-2 pb-6 border-t border-border/30 mt-auto">
                             <div className="flex items-center gap-2">
                               {post.author.avatar ? (
                                 <img

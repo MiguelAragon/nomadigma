@@ -52,7 +52,7 @@ export function PopularSneakers() {
       <div className="flex items-center justify-between gap-4">
         <span className="text-lg font-medium text-mono">Popular Sneakers</span>
 
-        <Button mode="link" asChild>
+        <Button variant="link" asChild>
           <Link href="/account/home/get-started" className="text-xs">
             See All <ChevronRight />
           </Link>

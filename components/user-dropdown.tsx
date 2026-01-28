@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, LogOut, UserCircle, Sun, Moon, Globe } from 'lucide-react';
+import { Settings, LogOut, UserCircle, Sun, Moon, Globe, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { SignOutButton } from '@clerk/nextjs';
@@ -177,13 +177,13 @@ export function UserDropdown({ isLight = false }: UserDropdownProps) {
 
         {/* Menu Items */}
         <DropdownMenuItem asChild>
-          <Link href="/public-profile" className="flex items-center gap-2">
-            <UserCircle className="size-4" />
-            {locale === 'es' ? 'Perfil Público' : 'Public Profile'}
+          <Link href="/store/my-orders" className="flex items-center gap-2">
+            <ShoppingBag className="size-4" />
+            {locale === 'es' ? 'Mis Pedidos' : 'My Orders'}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/${currentLocale}/settings`} className="flex items-center gap-2">
+          <Link href="/settings" className="flex items-center gap-2">
             <Settings className="size-4" />
             {locale === 'es' ? 'Configuración' : 'Settings'}
           </Link>

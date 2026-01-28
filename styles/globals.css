@@ -312,6 +312,22 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   overflow: hidden;
 }
 
+/* Prevent scroll lock for Select component */
+body {
+  scrollbar-gutter: stable;
+}
+
+/* Prevent body scroll lock when Select is open - mantener scroll habilitado */
+body:has([data-radix-select-content][data-state="open"]) {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
+/* Asegurar que el scrollbar siempre esté visible cuando hay contenido scrolleable */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* TipTap Editor Styles */
 .tiptap-editor-content {
   outline: none;
@@ -603,14 +619,23 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
 /* Shimmer animation for skeleton loaders */
 @keyframes shimmer {
   0% {
-    transform: translateX(-100%);
+    background-position: -1000px 0;
   }
   100% {
-    transform: translateX(100%);
+    background-position: 1000px 0;
   }
 }
 
-.animate-shimmer {
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted)) 40%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 60%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 1000px 100%;
   animation: shimmer 2s infinite;
 }
 
@@ -713,4 +738,18 @@ body:has([data-radix-dropdown-menu-content][data-state="open"]) {
   .rotating-word-animated[style*="transform"] {
     transform: var(--rotating-word-transform, translateY(0) scale(1) rotate(0deg)) !important;
   }
+}
+
+/* Category Icon Flip Animation */
+@keyframes iconFlip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(180deg);
+  }
+}
+
+.group:hover .icon-flip {
+  animation: iconFlip 0.3s ease-in-out;
 }

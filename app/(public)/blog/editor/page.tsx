@@ -31,7 +31,8 @@ import moment from 'moment';
 import { PageLoader } from '@/components/page-loader';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/use-translation';
-import { BLOG_CATEGORIES, getCategoryLabel } from '@/config/categories';
+import { CATEGORY_BLOG, getBlogCategoryLabel, getBlogCategories } from '@/config/categories';
+import { Container } from '@/components/ui/container';
 
 type EditorMode = 'edit' | 'preview';
 
@@ -51,7 +52,7 @@ interface PostFormData {
   // Metadata compartida
   readingTime: number; // Tiempo de lectura en minutos
   language: 'en' | 'es'; // Idioma principal del post
-  hashtags: string[];
+  categories: string[]; // Array de categorías (experiences, adventures, guides, etc.)
   coverImageFile: File | null; // Archivo de imagen en lugar de base64
   coverImagePreview: string | null; // Preview local para mostrar
   publishedAt: string | null;
@@ -69,7 +70,6 @@ export default function BlogEditorPage() {
   const [mode, setMode] = useState<EditorMode>('edit');
   const [loading, setLoading] = useState(false);
   const [translating, setTranslating] = useState(false);
-  const [hashtagInput, setHashtagInput] = useState('');
   const [isSlugEditable, setIsSlugEditable] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>(locale as 'en' | 'es');
@@ -95,7 +95,7 @@ export default function BlogEditorPage() {
     slugEs: '',
     readingTime: 0,
     language: locale as 'en' | 'es',
-    hashtags: [],
+    categories: [],
     coverImageFile: null,
     coverImagePreview: null,
     publishedAt: null,
@@ -154,7 +154,7 @@ export default function BlogEditorPage() {
           slugEs: post.slugEs || '',
           readingTime: post.readingTime || 0,
           language: (post.language || displayLang) as 'en' | 'es',
-          hashtags: post.hashtags || [],
+          categories: post.categories || [],
           coverImageFile: null,
           coverImagePreview: post.coverImage || null,
           publishedAt: post.publishedAt || null,
@@ -247,27 +247,16 @@ export default function BlogEditorPage() {
     }
   };
 
-  const handleAddHashtag = () => {
-    // Remover # y espacios, capitalizar primera letra
-    const cleaned = hashtagInput.trim().replace('#', '').replace(/\s+/g, '');
-    if (cleaned) {
-      // Capitalizar primera letra, resto en minúsculas
-      const tag = cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
-    if (tag && !formData.hashtags.includes(tag)) {
-      setFormData(prev => ({
+  const handleToggleCategory = (categoryKey: string) => {
+    setFormData(prev => {
+      const isSelected = prev.categories.includes(categoryKey);
+      return {
         ...prev,
-        hashtags: [...prev.hashtags, tag],
-      }));
-      setHashtagInput('');
-      }
-    }
-  };
-
-  const handleRemoveHashtag = (tag: string) => {
-    setFormData(prev => ({
-      ...prev,
-      hashtags: prev.hashtags.filter(t => t !== tag),
-    }));
+        categories: isSelected
+          ? prev.categories.filter(c => c !== categoryKey)
+          : [...prev.categories, categoryKey],
+      };
+    });
   };
 
   const translateContent = async (sourceLocale: string, targetLocale: string) => {
@@ -336,7 +325,7 @@ export default function BlogEditorPage() {
       // Metadata compartida
       formDataToSend.append('readingTime', formData.readingTime.toString());
       formDataToSend.append('language', formData.language);
-      formDataToSend.append('hashtags', JSON.stringify(formData.hashtags));
+      formDataToSend.append('categories', JSON.stringify(formData.categories));
       formDataToSend.append('status', status);
       
       // Si es edición, agregar postId y translate
@@ -660,28 +649,19 @@ export default function BlogEditorPage() {
                       {locale === 'es' ? 'Categorías' : 'Categories'}
                     </Label>
                     <div className="flex flex-wrap gap-2">
-                      {BLOG_CATEGORIES.map((category) => {
-                        const isSelected = formData.hashtags.includes(category);
-                        const label = getCategoryLabel(category, locale as 'en' | 'es');
+                      {Object.entries(CATEGORY_BLOG).map(([categoryKey, categoryData]) => {
+                        const isSelected = formData.categories.includes(categoryKey);
+                        const label = categoryData[locale as 'en' | 'es'];
                         return (
                           <Badge
-                            key={category}
+                            key={categoryKey}
                             variant={isSelected ? "default" : "outline"}
                             className={`cursor-pointer transition-colors ${
                               isSelected 
                                 ? 'bg-indigo-600 hover:bg-indigo-700 text-white' 
                                 : 'hover:bg-muted'
                             }`}
-                            onClick={() => {
-                              if (isSelected) {
-                                handleRemoveHashtag(category);
-                              } else {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  hashtags: [...prev.hashtags, category],
-                                }));
-                              }
-                            }}
+                            onClick={() => handleToggleCategory(categoryKey)}
                           >
                             {label}
                             {isSelected && <X className="h-3 w-3 ml-1" />}
@@ -689,7 +669,7 @@ export default function BlogEditorPage() {
                         );
                       })}
                       </div>
-                    {formData.hashtags.length === 0 && (
+                    {formData.categories.length === 0 && (
                       <p className="text-sm text-muted-foreground mt-2">
                         {locale === 'es' 
                           ? 'Selecciona al menos una categoría' 
@@ -802,7 +782,7 @@ export default function BlogEditorPage() {
               coverImage={formData.coverImagePreview || undefined}
               date={new Date().toISOString()}
               readingTime={formData.readingTime || calculateReadingTime(getCurrentContent())}
-              hashtags={formData.hashtags}
+              categories={formData.categories.map(cat => getBlogCategoryLabel(cat, locale as 'en' | 'es'))}
               author={{
                 name: dbUser?.firstName && dbUser?.lastName 
                   ? `${dbUser.firstName} ${dbUser.lastName}`

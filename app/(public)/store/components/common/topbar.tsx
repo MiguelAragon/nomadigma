@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
-import { Heart, Search, ShoppingCart, UserCircle } from 'lucide-react';
+import { Heart, Search, UserCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,14 +11,14 @@ import { useStoreClient } from '@/app/(public)/store/components/context';
 
 export function StoreClientTopbar() {
   const pathname = usePathname();
-  const { showCartSheet, showWishlistSheet } = useStoreClient();
+  const { showWishlistSheet } = useStoreClient();
 
   return (
     <>
       <div className="flex items-center gap-1">
         {!pathname.includes('store-client/home') &&
           !pathname.includes('store-client/wishlist') &&
-          !pathname.includes('store-client/search-results-grid') &&
+          !pathname.includes('store-client/search') &&
           !pathname.includes('store-client/search-results-list') &&
           !pathname.includes('store-client/product-details') && (
             <div className="relative lg:w-[240px] me-3">
@@ -57,33 +58,6 @@ export function StoreClientTopbar() {
         >
           <Heart className="size-5!" />
         </Button>
-
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="lg"
-            mode="icon"
-            shape="circle"
-            onClick={showCartSheet}
-            className="relative hover:text-primary"
-          >
-            <ShoppingCart className="size-5!" />
-            <Badge
-              className="absolute top-0.5 end-0.5"
-              variant="success"
-              size="xs"
-              shape="circle"
-            >
-              3
-            </Badge>
-          </Button>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-secondary-foreground">
-              Total
-            </span>
-            <span className="text-xs font-medium text-dark">$94.56</span>
-          </div>
-        </div>
       </div>
     </>
   );

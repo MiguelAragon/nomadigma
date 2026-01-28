@@ -1,6 +1,8 @@
 {
   "common": {
     "login": "Iniciar sesión",
+    "see_more": "Ver más",
+    "add_to_card": "Agregar al carrito",
     "language_not_supported": "Idioma no soportado",
     "redirecting": "Redirigiendo a inglés...",
     "buttons": {

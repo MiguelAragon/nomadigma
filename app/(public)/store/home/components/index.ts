@@ -1,3 +1,4 @@
+export * from './categories';
 export * from './deals';
 export * from './featured-products';
 export * from './info';

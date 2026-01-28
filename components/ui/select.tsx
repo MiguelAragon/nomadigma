@@ -5,7 +5,10 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const Select = SelectPrimitive.Root;
+// Wrapper para Select que desactiva el modal por defecto para evitar bloqueo de scroll
+const Select = ({ modal = false, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => (
+  <SelectPrimitive.Root modal={modal} {...props} />
+);
 
 const SelectGroup = SelectPrimitive.Group;
 
@@ -62,7 +65,39 @@ SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayNam
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = 'popper', ...props }, ref) => (
+>(({ className, children, position = 'popper', ...props }, ref) => {
+  // Prevenir bloqueo del scroll cuando el Select se abre/cierra
+  React.useEffect(() => {
+    const preventScrollLock = () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+
+    // Ejecutar inmediatamente y en cada cambio
+    preventScrollLock();
+    
+    // Usar MutationObserver para detectar cuando el Select se abre
+    const observer = new MutationObserver(() => {
+      const isOpen = document.querySelector('[data-radix-select-content][data-state="open"]');
+      if (isOpen) {
+        preventScrollLock();
+      }
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-state'],
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      preventScrollLock();
+    };
+  }, []);
+
+  return (
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
@@ -73,6 +108,16 @@ const SelectContent = React.forwardRef<
         className
       )}
       position={position}
+        onCloseAutoFocus={(e) => {
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+          props.onCloseAutoFocus?.(e);
+        }}
+        onEscapeKeyDown={(e) => {
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+          props.onEscapeKeyDown?.(e);
+        }}
       {...props}
     >
       <SelectScrollUpButton />
@@ -88,7 +133,8 @@ const SelectContent = React.forwardRef<
       <SelectScrollDownButton />
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
-));
+  );
+});
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectLabel = React.forwardRef<

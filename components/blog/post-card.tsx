@@ -12,6 +12,7 @@ import {
   Play,
   Clock
 } from 'lucide-react';
+import { getBlogCategoryLabel } from '@/config/categories';
 
 export interface BlogPost {
   id: number;
@@ -26,7 +27,6 @@ export interface BlogPost {
     avatar?: string;
   };
   categories: string[];
-  hashtags: string[];
   attachments: Array<{
     id: number;
     url: string;
@@ -40,9 +40,10 @@ export interface BlogPost {
 
 interface PostCardProps {
   post: BlogPost;
+  locale?: 'en' | 'es';
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, locale = 'es' }: PostCardProps) {
   const formatDate = (dateString: string) => {
     return moment(dateString).fromNow();
   };
@@ -65,7 +66,7 @@ export function PostCard({ post }: PostCardProps) {
       <div className="p-6 flex flex-col flex-grow">
         {/* 1. Title - First */}
         <Link href={post.slug.startsWith('/') ? post.slug : `/blog/${post.slug}`}>
-          <h2 className="text-lg font-bold text-foreground leading-snug group-hover:text-blue-800 dark:group-hover:text-blue-500 transition-colors cursor-pointer line-clamp-2 mb-3">
+          <h2 className="text-lg font-bold text-foreground leading-snug cursor-pointer line-clamp-2 mb-3">
             {post.title}
           </h2>
         </Link>
@@ -121,12 +122,27 @@ export function PostCard({ post }: PostCardProps) {
               {!post.hasVideo && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300" />
               )}
-            {/* Category Badge on Image */}
+              {/* Gradient overlay at bottom for better readability of categories */}
+              <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/60 via-black/30 to-transparent pointer-events-none" />
+            {/* Category Badges on Image - Bottom */}
             {post.categories.length > 0 && (
-                <div className="absolute top-3 right-3">
-                  <Badge className="text-xs font-semibold bg-white/90 dark:bg-gray-900/90 text-gray-900 dark:text-gray-100 backdrop-blur-sm shadow-lg">
-                  {post.categories[0]}
-                </Badge>
+                <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[calc(100%-24px)]">
+                  {post.categories.slice(0, 2).map((categoryKey, idx) => {
+                    const categoryLabel = getBlogCategoryLabel(categoryKey, locale);
+                    return (
+                      <Badge 
+                        key={idx}
+                        className="text-xs font-semibold bg-white/75 dark:bg-gray-900/75 text-gray-900 dark:text-gray-100 backdrop-blur-sm shadow-lg border-0"
+                      >
+                        {categoryLabel}
+                      </Badge>
+                    );
+                  })}
+                  {post.categories.length > 2 && (
+                    <Badge className="text-xs font-semibold bg-white/75 dark:bg-gray-900/75 text-gray-900 dark:text-gray-100 backdrop-blur-sm shadow-lg border-0">
+                      +{post.categories.length - 2}
+                    </Badge>
+                  )}
               </div>
             )}
           </div>

@@ -1,12 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-import { ShoppingCart, Star } from 'lucide-react';
+import { useState } from 'react';
+import { Star } from 'lucide-react';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useStoreClient } from '@/app/(public)/store/components/context';
 
 interface ICard3Props {
   badge?: boolean;
@@ -33,30 +31,55 @@ export function Card3({
   category1,
   category2,
 }: ICard3Props) {
-  const { showCartSheet, showProductDetailsSheet } = useStoreClient();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const handleProductClick = () => {
+    if (sku) {
+      window.location.href = `/store/products/${sku}`;
+    }
+    // Si no hay sku, no hacer nada
+  };
 
   return (
-    <Card>
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group cursor-pointer"
+      onClick={handleProductClick}
+    >
       <CardContent className="flex items-center flex-wrap justify-between p-2 pe-5 gap-4.5">
         <div className="flex items-center gap-3.5">
-          <Card className="flex items-center justify-center bg-accent/50 h-[70px] w-[90px] shadow-none">
-            <img
-              src={toAbsoluteUrl(`/media/store/client/600x600/${logo}`)}
-              className="h-[70px] cursor-pointer"
-              onClick={() => showProductDetailsSheet('productid')}
-              alt="image"
-            />
+          <Card className="flex items-center justify-center bg-accent/50 h-[70px] w-[90px] shadow-none overflow-hidden relative">
+            {!imageLoaded && !imageError && (
+              <div className="absolute inset-0 shimmer"></div>
+            )}
+
+            {!imageError && (
+              <img
+                src={toAbsoluteUrl(`/media/store/client/600x600/${logo}`)}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => {
+                  setImageError(true);
+                  setImageLoaded(true);
+                }}
+                className={`h-[70px] group-hover:scale-110 transition-transform duration-500 ease-out object-cover ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                alt="image"
+              />
+            )}
+
+            {imageError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                <div className="text-muted-foreground text-xs">No image</div>
+              </div>
+            )}
           </Card>
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2.5 -mt-1">
-              <Link
-                href="#"
-                className="hover:text-primary text-sm font-medium text-mono leading-5.5"
-                onClick={() => showProductDetailsSheet('productid')}
-              >
+              <div className="hover:text-primary text-sm font-medium text-mono leading-5.5 group-hover:text-primary transition-colors duration-300">
                 {title}
-              </Link>
+              </div>
 
               {badge && (
                 <Badge size="sm" variant="destructive" className="uppercase">
@@ -80,12 +103,11 @@ export function Card3({
               </Badge>
 
               <div className="flex items-center flex-wrap gap-2 lg:gap-4">
-                <span className="text-xs font-normal text-secondary-foreground uppercase">
-                  sku:{' '}
+                {sku && (
                   <span className="text-xs font-medium text-foreground">
                     {sku}
                   </span>
-                </span>
+                )}
                 <span className="text-xs font-normal text-secondary-foreground">
                   Category:{' '}
                   <span className="text-xs font-medium text-foreground">
@@ -108,13 +130,6 @@ export function Card3({
             {label}
           </span>
           <span className="text-sm font-medium text-mono">${total}</span>
-          <Button
-            variant="outline"
-            className="ms-2 shrink-0"
-            onClick={showCartSheet}
-          >
-            <ShoppingCart /> Add to Cart
-          </Button>
         </div>
       </CardContent>
     </Card>

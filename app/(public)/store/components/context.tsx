@@ -10,16 +10,15 @@ export interface CartItem {
   total: string;
   sku: string;
   quantity: number;
+  productType?: 'PHYSICAL' | 'DIGITAL';
   label?: string;
   badge?: boolean;
+  selectedVariants?: Record<string, string>; // { [variantLabel]: variantValue }
 }
 
 // Define the state interface
 interface StoreClientState {
   isWishlistSheetOpen: boolean;
-  isCartSheetOpen: boolean;
-  isProductDetailsSheetOpen: boolean;
-  productDetailsId: string | null;
   cartItems: CartItem[];
 }
 
@@ -27,57 +26,46 @@ interface StoreClientState {
 type StoreClientAction =
   | { type: 'SHOW_WISHLIST_SHEET' }
   | { type: 'CLOSE_WISHLIST_SHEET' }
-  | { type: 'SHOW_CART_SHEET' }
-  | { type: 'CLOSE_CART_SHEET' }
-  | { type: 'SHOW_PRODUCT_DETAILS_SHEET'; productId: string }
-  | { type: 'CLOSE_PRODUCT_DETAILS_SHEET' }
   | { type: 'ADD_TO_CART'; item: CartItem }
   | { type: 'REMOVE_FROM_CART'; itemId: string }
   | { type: 'UPDATE_CART_ITEM_QUANTITY'; itemId: string; quantity: number }
   | { type: 'CLEAR_CART' };
 
-// Initial state with sample cart items
-const initialState: StoreClientState = {
-  isWishlistSheetOpen: false,
-  isCartSheetOpen: false,
-  isProductDetailsSheetOpen: false,
-  productDetailsId: null,
-  cartItems: [
-    {
-      id: '1',
-      logo: '11.png',
-      title: 'Cloud Shift Lightweight Runner Pro Edition',
-      total: '120.00',
-      sku: 'BT-A1-YLW-8',
-      quantity: 1,
-    },
-    {
-      id: '2',
-      logo: '12.png',
-      title: 'Titan Edge High Impact Stability Lightweight..',
-      total: '99.00',
-      sku: 'SNK-888-RED-42',
-      quantity: 1,
-    },
-    {
-      id: '3',
-      logo: '13.png',
-      title: 'Cloud Shift Lightweight Runner Pro Edition',
-      total: '120.00',
-      sku: 'SD-999-TAN-38',
-      quantity: 1,
-    },
-    {
-      id: '4',
-      logo: '15.png',
-      title: 'Wave Strike Dynamic Boost Sneaker',
-      label: '$179.00',
-      total: '144.00',
-      badge: true,
-      sku: 'BT-444-BRN-7',
-      quantity: 1,
-    },
-  ],
+// LocalStorage key
+const CART_STORAGE_KEY = 'nomadigma_cart';
+
+// Helper functions for localStorage
+function loadCartFromStorage(): CartItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(CART_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error('Error loading cart from localStorage:', error);
+  }
+  return [];
+}
+
+function saveCartToStorage(cartItems: CartItem[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
+  } catch (error) {
+    console.error('Error saving cart to localStorage:', error);
+  }
+}
+
+// Initial state - load cart from localStorage
+const getInitialState = (): StoreClientState => {
+  const cartItems = loadCartFromStorage();
+  return {
+    isWishlistSheetOpen: false,
+    cartItems,
+  };
 };
 
 // Reducer to manage state
@@ -90,57 +78,82 @@ function storeClientReducer(
       return { ...state, isWishlistSheetOpen: true };
     case 'CLOSE_WISHLIST_SHEET':
       return { ...state, isWishlistSheetOpen: false };
-    case 'SHOW_CART_SHEET':
-      return { ...state, isCartSheetOpen: true };
-    case 'CLOSE_CART_SHEET':
-      return { ...state, isCartSheetOpen: false };
-    case 'SHOW_PRODUCT_DETAILS_SHEET':
-      return {
-        ...state,
-        isProductDetailsSheetOpen: true,
-        productDetailsId: action.productId,
-      };
-    case 'CLOSE_PRODUCT_DETAILS_SHEET':
-      return {
-        ...state,
-        isProductDetailsSheetOpen: false,
-        productDetailsId: null,
-      };
     case 'ADD_TO_CART':
-      // Check if item already exists in cart
+      // Check if item already exists in cart with same variants
       const existingItemIndex = state.cartItems.findIndex(
-        (item) => item.id === action.item.id
+        (item) => {
+          if (item.id !== action.item.id) return false;
+          // Compare variants
+          const itemVariants = JSON.stringify(item.selectedVariants || {});
+          const newItemVariants = JSON.stringify(action.item.selectedVariants || {});
+          return itemVariants === newItemVariants;
+        }
       );
+      let newCartItems: CartItem[];
+      
+      // Verificar si el producto es gratis (precio 0)
+      const isFree = parseFloat(action.item.total) === 0;
+      
       if (existingItemIndex >= 0) {
-        // Increment quantity if item exists
-        const updatedItems = [...state.cartItems];
-        updatedItems[existingItemIndex] = {
-          ...updatedItems[existingItemIndex],
-          quantity: updatedItems[existingItemIndex].quantity + 1,
-        };
-        return { ...state, cartItems: updatedItems, isCartSheetOpen: true };
+        // Si es gratis, no permitir incrementar cantidad más allá de 1
+        if (isFree) {
+          // Si ya existe y es gratis, mantener cantidad en 1
+          newCartItems = [...state.cartItems];
+          newCartItems[existingItemIndex] = {
+            ...newCartItems[existingItemIndex],
+            quantity: 1,
+          };
+        } else {
+          // Increment quantity if item exists with same variants
+          newCartItems = [...state.cartItems];
+          newCartItems[existingItemIndex] = {
+            ...newCartItems[existingItemIndex],
+            quantity: newCartItems[existingItemIndex].quantity + 1,
+          };
+        }
+      } else {
+        // Add new item to cart (siempre con cantidad 1 si es gratis)
+        newCartItems = [...state.cartItems, { ...action.item, quantity: 1 }];
       }
-      // Add new item to cart
-      return {
-        ...state,
-        cartItems: [...state.cartItems, action.item],
-        isCartSheetOpen: true,
-      };
+      saveCartToStorage(newCartItems);
+      return { ...state, cartItems: newCartItems };
     case 'REMOVE_FROM_CART':
+      const filteredItems = state.cartItems.filter((item) => item.id !== action.itemId);
+      saveCartToStorage(filteredItems);
       return {
         ...state,
-        cartItems: state.cartItems.filter((item) => item.id !== action.itemId),
+        cartItems: filteredItems,
       };
     case 'UPDATE_CART_ITEM_QUANTITY':
+      // Si la cantidad es 0 o menor, eliminar el producto del carrito
+      if (action.quantity <= 0) {
+        const filteredItems = state.cartItems.filter((item) => item.id !== action.itemId);
+        saveCartToStorage(filteredItems);
+        return {
+          ...state,
+          cartItems: filteredItems,
+        };
+      }
+      // Verificar si el producto es gratis
+      const itemToUpdate = state.cartItems.find((item) => item.id === action.itemId);
+      const isItemFree = itemToUpdate && parseFloat(itemToUpdate.total) === 0;
+      
+      // Si es gratis, limitar cantidad a 1
+      const finalQuantity = isItemFree ? Math.min(action.quantity, 1) : action.quantity;
+      
+      // Actualizar la cantidad normalmente
+      const updatedItems = state.cartItems.map((item) =>
+        item.id === action.itemId
+          ? { ...item, quantity: finalQuantity }
+          : item
+      );
+      saveCartToStorage(updatedItems);
       return {
         ...state,
-        cartItems: state.cartItems.map((item) =>
-          item.id === action.itemId
-            ? { ...item, quantity: action.quantity }
-            : item
-        ),
+        cartItems: updatedItems,
       };
     case 'CLEAR_CART':
+      saveCartToStorage([]);
       return { ...state, cartItems: [] };
     default:
       return state;
@@ -152,10 +165,6 @@ interface StoreClientContextValue {
   state: StoreClientState;
   showWishlistSheet: () => void;
   closeWishlistSheet: () => void;
-  showCartSheet: () => void;
-  closeCartSheet: () => void;
-  showProductDetailsSheet: (productId: string) => void;
-  closeProductDetailsSheet: () => void;
   handleAddToCart: (item: CartItem) => void;
   handleRemoveFromCart: (itemId: string) => void;
   handleUpdateCartItemQuantity: (itemId: string, quantity: number) => void;
@@ -175,16 +184,10 @@ export function StoreClientProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [state, dispatch] = React.useReducer(storeClientReducer, initialState);
+  const [state, dispatch] = React.useReducer(storeClientReducer, getInitialState());
 
   const showWishlistSheet = () => dispatch({ type: 'SHOW_WISHLIST_SHEET' });
   const closeWishlistSheet = () => dispatch({ type: 'CLOSE_WISHLIST_SHEET' });
-  const showCartSheet = () => dispatch({ type: 'SHOW_CART_SHEET' });
-  const closeCartSheet = () => dispatch({ type: 'CLOSE_CART_SHEET' });
-  const showProductDetailsSheet = (productId: string) =>
-    dispatch({ type: 'SHOW_PRODUCT_DETAILS_SHEET', productId });
-  const closeProductDetailsSheet = () =>
-    dispatch({ type: 'CLOSE_PRODUCT_DETAILS_SHEET' });
   const handleAddToCart = (item: CartItem) =>
     dispatch({ type: 'ADD_TO_CART', item });
   const handleRemoveFromCart = (itemId: string) =>
@@ -207,10 +210,6 @@ export function StoreClientProvider({
     state,
     showWishlistSheet,
     closeWishlistSheet,
-    showCartSheet,
-    closeCartSheet,
-    showProductDetailsSheet,
-    closeProductDetailsSheet,
     handleAddToCart,
     handleRemoveFromCart,
     handleUpdateCartItemQuantity,

@@ -25,7 +25,7 @@ const items = [
     ),
   },
   {
-    text: 'SKU',
+    text: 'Variation',
     info: (
       <span className="text-xs font-medium text-foreground">SH-001-BLK-42</span>
     ),

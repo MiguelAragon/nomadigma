@@ -3,10 +3,7 @@ import Stripe from 'stripe';
 import { currentUser } from '@clerk/nextjs/server';
 import { APIResponse, getUser } from '@/lib/api-helper';
 import { prisma } from '@/lib/prisma';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-12-15.clover',
-});
+import { getStripe } from '@/lib/stripe';
 
 interface CartItem {
   id: string;
@@ -191,6 +188,7 @@ export async function POST(req: NextRequest) {
       sessionConfig.payment_method_types = [];
     }
 
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create(sessionConfig);
 
     // Guardar la orden en la DB ANTES de retornar la URL

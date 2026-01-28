@@ -105,7 +105,7 @@ export function DiarySection() {
                     </div>
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                    <h3 className="text-xl font-bold mb-2 line-clamp-2">
                       {post.title}
                     </h3>
                     <p className="text-muted-foreground text-sm line-clamp-3 mb-4">

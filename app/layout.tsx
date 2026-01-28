@@ -7,8 +7,11 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { NavigationProvider } from '@/providers/navigation-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { I18nProvider } from '@/providers/i18n-provider';
+import { StoreClientProvider } from '@/app/(public)/store/components/context';
+import { StoreClientWrapper } from '@/app/(public)/store/components/wrapper';
 import { Toaster } from '@/components/ui/sonner';
 import { GoogleAnalytics } from '@/components/google-analytics';
+import { CookieBanner } from '@/components/cookie-banner';
 
 const dmSans = DM_Sans({ 
   subsets: ['latin'],
@@ -25,6 +28,9 @@ export const metadata: Metadata = {
     default: 'Nomadigma - Blog de viajes y nómada digital',
   },
   description: 'Explora el mundo como nómada digital. Guías de viaje, tips y experiencias.',
+  icons: {
+    icon: '/favicon.ico',
+  },
   openGraph: {
     title: 'Nomadigma - Blog de viajes y nómada digital',
     description: 'Explora el mundo como nómada digital. Guías de viaje, tips y experiencias.',
@@ -34,9 +40,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://nomadigma.com/nomadigma.png',
-        width: 1200,
-        height: 630,
+        url: 'https://nomadigma.com/nomadigma_preview.png',
+        width: 640,
+        height: 598,
         alt: 'Nomadigma',
       }
     ],
@@ -45,7 +51,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Nomadigma - Blog de viajes y nómada digital',
     description: 'Explora el mundo como nómada digital. Guías de viaje, tips y experiencias.',
-    images: ['https://nomadigma.com/nomadigma.png'],
+    images: ['https://nomadigma.com/nomadigma_preview.png'],
     creator: '@nomadigma',
   },
 };
@@ -136,11 +142,16 @@ export default async function RootLayout({
             >
               <TooltipProvider>
                 <NavigationProvider>
+                  <StoreClientProvider>
+                    <StoreClientWrapper>
                   <GoogleAnalytics />
                   {children}
+                    </StoreClientWrapper>
+                  </StoreClientProvider>
                 </NavigationProvider>
               </TooltipProvider>
               <Toaster />
+              <CookieBanner />
             </ThemeProvider>
           </AuthProvider>
         </I18nProvider>

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { Container } from '@/components/ui/container';
 
 interface Post {
   id: string;
@@ -85,29 +86,29 @@ export default function AdminPostsPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <Container className="py-8">
         <p className="text-center">Cargando...</p>
-      </div>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <Container className="py-8">
         <p className="text-center text-red-500">{error}</p>
-      </div>
+      </Container>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Container className="py-8">
       <div className="mb-8 flex items-start justify-between">
         <div>
         <h1 className="text-3xl font-bold mb-2">Gestión de Posts</h1>
         <p className="text-muted-foreground">Administra el estado de los posts del blog</p>
         </div>
         <Button 
-          onClick={() => router.push(`/${locale}/blog/editor`)}
+          onClick={() => router.push(`/blog/editor`)}
           className="gap-2"
         >
           <Plus className="size-4" />
@@ -223,7 +224,7 @@ export default function AdminPostsPage() {
           </button>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
 

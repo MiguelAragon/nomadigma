@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Container } from '@/components/ui/container';
 import {
   Dialog,
   DialogContent,
@@ -212,22 +213,22 @@ export default function AdminGalleryPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <Container className="py-8">
         <p className="text-center">Cargando...</p>
-      </div>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <Container className="py-8">
         <p className="text-center text-red-500">{error}</p>
-      </div>
+      </Container>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Container className="py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Gestión de Galería</h1>
@@ -470,7 +471,7 @@ export default function AdminGalleryPage() {
           Siguiente
         </Button>
       </div>
-    </div>
+    </Container>
   );
 }
 

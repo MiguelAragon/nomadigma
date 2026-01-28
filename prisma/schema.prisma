@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -9,22 +9,24 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  clerkUserId   String    @unique
-  email         String    @unique
-  firstName     String?
-  lastName      String?
-  imageUrl      String?
-  bio           String?
-  role          UserRole  @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  lastSignInAt  DateTime?
+  id           String    @id @default(cuid())
+  clerkUserId  String    @unique
+  email        String    @unique
+  firstName    String?
+  lastName     String?
+  imageUrl     String?
+  bio          String?
+  role         UserRole  @default(USER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastSignInAt DateTime?
 
   // Relations
-  posts         Post[]
-  activities    Activity[]
-  galleries     Gallery[]
+  posts      Post[]
+  activities Activity[]
+  galleries  Gallery[]
+  products   Product[]
+  orders     Order[]
 
   @@index([clerkUserId])
   @@index([email])
@@ -33,60 +35,60 @@ model User {
 }
 
 model Post {
-  id            String    @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Multilenguaje
   titleEn       String
   titleEs       String
-  slugEn        String    @unique
-  slugEs        String    @unique
-  contentEn     String    @db.Text
-  contentEs     String    @db.Text
-  descriptionEn String?   @db.Text
-  descriptionEs String?   @db.Text
-  
+  slugEn        String  @unique
+  slugEs        String  @unique
+  contentEn     String  @db.Text
+  contentEs     String  @db.Text
+  descriptionEn String? @db.Text
+  descriptionEs String? @db.Text
+
   // Metadata
-  status        PostStatus @default(DRAFT)
-  language      String    // Idioma principal del post ('en' o 'es')
-  hashtags      String[]  // Array nativo de PostgreSQL
-  coverImage    String?   // URL de la imagen de portada
+  status              PostStatus @default(DRAFT)
+  language            String // Idioma principal del post ('en' o 'es')
+  categories          String[] // Array de categorías del post (experiences, adventures, guides, etc.)
+  coverImage          String? // URL de la imagen de portada
   coverImageThumbnail String? // URL del thumbnail de la imagen de portada
-  readingTime   Int?       // Tiempo de lectura en minutos
-  publishedAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  readingTime         Int? // Tiempo de lectura en minutos
+  publishedAt         DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
   // Relations
-  creatorId     String
-  creator       User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  activities    Activity[]
+  creatorId  String
+  creator    User       @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  activities Activity[]
 
   // Contadores (opcionales, para performance)
-  viewCount     Int       @default(0)
-  likeCount     Int       @default(0)
-  commentCount  Int       @default(0)
+  viewCount    Int @default(0)
+  likeCount    Int @default(0)
+  commentCount Int @default(0)
 
   @@index([creatorId])
   @@index([status])
   @@index([publishedAt])
   @@index([slugEn])
   @@index([slugEs])
-  @@index([hashtags], type: Gin) // Índice GIN para búsquedas en arrays
+  @@index([categories], type: Gin) // Índice GIN para búsquedas en arrays
   @@map("posts")
 }
 
 model Activity {
-  id        String    @id @default(cuid())
+  id        String       @id @default(cuid())
   type      ActivityType
-  content   String?   @db.Text // Para comentarios
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  content   String?      @db.Text // Para comentarios
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   // Relations
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId    String
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   // Evitar duplicados (un usuario solo puede dar like una vez)
   @@unique([userId, postId, type])
@@ -98,20 +100,20 @@ model Activity {
 }
 
 model Gallery {
-  id          String        @id @default(uuid())
-  titleEn     String
-  titleEs     String
-  contentEn   String        @db.Text
-  contentEs   String        @db.Text
-  url         String        // URL de la imagen original
-  urlThumbnail String?      // URL del thumbnail (opcional)
-  status      GalleryStatus @default(PUBLISHED)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  
+  id           String        @id @default(uuid())
+  titleEn      String
+  titleEs      String
+  contentEn    String        @db.Text
+  contentEs    String        @db.Text
+  url          String // URL de la imagen original
+  urlThumbnail String? // URL del thumbnail (opcional)
+  status       GalleryStatus @default(PUBLISHED)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
   // Relations
-  creatorId   String
-  creator     User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@index([creatorId])
   @@index([status])
@@ -141,3 +143,75 @@ enum GalleryStatus {
   ARCHIVED
 }
 
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum ProductType {
+  PHYSICAL
+  DIGITAL
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  titleEn     String
+  titleEs     String
+  slugEn      String?  @unique // Slug en inglés
+  slugEs      String?  @unique // Slug en español
+  descriptionEn String @db.Text
+  descriptionEs String @db.Text
+  category    String
+  price       Float    // Precio original (siempre)
+  finalPrice  Float?   // Precio con descuento aplicado (NULL si no hay descuento, 0 si es gratis)
+  isOnSale    Boolean  @default(false)
+  discountPercentage Float? // Porcentaje de descuento (0-100)
+  productType ProductType @default(PHYSICAL) // Tipo de producto: físico o digital
+  hasShippingCost Boolean @default(false) // Si tiene costo de envío (solo para productos físicos)
+  shippingCost Float? // Costo de envío (solo si hasShippingCost es true)
+  images      String[] // Array de URLs de imágenes
+  variants    Json?    // Array de variantes: [{ language: string, label: string, values: string[] }]
+  variantFiles Json?   // Mapeo de valores de variantes a URLs de archivos: { [value: string]: string }
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
+  @@index([category])
+  @@index([active])
+  @@index([slugEn])
+  @@index([slugEs])
+  @@index([productType])
+  @@map("products")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  stripeSessionId String      @unique // ID de la sesión de Stripe
+  status          OrderStatus @default(PENDING)
+  cartItems       Json        // Array de items del carrito
+  subtotal        Float
+  shipping        Float
+  vat             Float
+  total           Float
+  customerEmail   String?     // Email del cliente
+  completedAt     DateTime?   // Fecha de completado del pago
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations (opcional - puede ser checkout sin autenticación)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([stripeSessionId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}

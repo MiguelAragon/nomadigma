@@ -53,9 +53,9 @@ export function validateImageFile(file: File | null): { isValid: boolean; error?
     return { isValid: false, error: 'No se proporcionó ningún archivo' };
   }
 
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   if (!file.type || !allowedTypes.includes(file.type)) {
-    return { isValid: false, error: 'Solo se permiten imágenes JPG, JPEG o PNG' };
+    return { isValid: false, error: 'Solo se permiten imágenes JPG, JPEG, PNG o WebP' };
   }
 
   const maxSize = 10 * 1024 * 1024; // 10MB
@@ -180,7 +180,7 @@ Return a JSON object with this exact structure:
 /**
  * Genera un slug URL-friendly a partir de un título
  */
-function generateSlug(title: string): string {
+export function generateSlug(title: string): string {
   return title
     .toLowerCase()
     .normalize('NFD')

@@ -11,18 +11,17 @@ import {
   SortAsc, 
   SortDesc, 
   FileText,
-  Tag,
   ChevronDown,
   ChevronUp,
   X
 } from 'lucide-react';
+import { CATEGORY_BLOG, getBlogCategoryLabel } from '@/config/categories';
 
 export interface BlogFiltersState {
   search: string;
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   categories: string[];
-  hashtags: string[];
 }
 
 interface BlogFiltersProps {
@@ -36,25 +35,6 @@ const SORT_OPTIONS = [
   { value: 'views', label: 'Visualizaciones' },
 ];
 
-const CATEGORIES = [
-  'Experiencias',
-  'Aventuras',
-  'Guías',
-  'Tips de viaje',
-  'Cultura e Historia',
-  'Fotografía',
-  'Aprendizaje',
-  'Reflexiones',
-];
-
-const POPULAR_HASHTAGS = [
-  '#nomadigma',
-  '#viajes',
-  '#aventura',
-  '#fotografia',
-  '#gastronomia',
-  '#cultura',
-];
 
 export function BlogFilters({ onFiltersChange }: BlogFiltersProps) {
   const [filters, setFilters] = useState<BlogFiltersState>({
@@ -62,14 +42,12 @@ export function BlogFilters({ onFiltersChange }: BlogFiltersProps) {
     sortBy: 'date',
     sortOrder: 'desc',
     categories: [],
-    hashtags: [],
   });
 
   const [expandedSections, setExpandedSections] = useState({
     search: true,
     sort: true,
     categories: true,
-    hashtags: true,
   });
 
   const updateFilters = (newFilters: Partial<BlogFiltersState>) => {
@@ -85,12 +63,6 @@ export function BlogFilters({ onFiltersChange }: BlogFiltersProps) {
     updateFilters({ categories: newCategories });
   };
 
-  const toggleHashtag = (hashtag: string) => {
-    const newHashtags = filters.hashtags.includes(hashtag)
-      ? filters.hashtags.filter(h => h !== hashtag)
-      : [...filters.hashtags, hashtag];
-    updateFilters({ hashtags: newHashtags });
-  };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -101,8 +73,7 @@ export function BlogFilters({ onFiltersChange }: BlogFiltersProps) {
 
   const hasActiveFilters = 
     filters.search || 
-    filters.categories.length > 0 || 
-    filters.hashtags.length > 0;
+    filters.categories.length > 0;
 
   return (
     <div className="flex flex-col gap-5">
@@ -207,92 +178,45 @@ export function BlogFilters({ onFiltersChange }: BlogFiltersProps) {
         {expandedSections.categories && (
           <CardContent className="pt-0">
             <div className="space-y-2">
-              {CATEGORIES.map((category) => (
+              {Object.entries(CATEGORY_BLOG).map(([categoryKey, categoryData]) => {
+                const label = categoryData['es']; // Usar español por defecto, se puede hacer dinámico
+                return (
                 <label
-                  key={category}
+                  key={categoryKey}
                   className="flex items-center gap-2 cursor-pointer group"
                 >
                   <input
                     type="checkbox"
-                    checked={filters.categories.includes(category)}
-                    onChange={() => toggleCategory(category)}
+                    checked={filters.categories.includes(categoryKey)}
+                    onChange={() => toggleCategory(categoryKey)}
                     className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
                   <span className="text-sm group-hover:text-indigo-600 transition-colors">
-                    {category}
+                    {label}
                   </span>
                 </label>
-              ))}
+                );
+              })}
             </div>
             {filters.categories.length > 0 && (
               <div className="mt-3 pt-3 border-t flex flex-wrap gap-1">
-                {filters.categories.map((category) => (
+                {filters.categories.map((categoryKey) => {
+                  const label = getBlogCategoryLabel(categoryKey, 'es'); // Usar español por defecto
+                  return (
                   <Badge
-                    key={category}
+                    key={categoryKey}
                     variant="secondary"
                     className="text-xs cursor-pointer hover:bg-red-100 hover:text-red-700 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleCategory(category);
+                      toggleCategory(categoryKey);
                     }}
                   >
-                    {category}
+                    {label}
                     <X className="h-3 w-3 ml-1" />
                   </Badge>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        )}
-      </Card>
-
-      {/* Hashtags */}
-      <Card>
-        <CardHeader 
-          className="cursor-pointer relative pb-4"
-          onClick={() => toggleSection('hashtags')}
-        >
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Tag className="h-4 w-4" />
-            Hashtags
-            {filters.hashtags.length > 0 && (
-              <Badge className="ml-auto">{filters.hashtags.length}</Badge>
-            )}
-          </CardTitle>
-          <div className="absolute right-6 top-1/2 transform -translate-y-1/2">
-            {expandedSections.hashtags ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </div>
-        </CardHeader>
-        {expandedSections.hashtags && (
-          <CardContent className="pt-0">
-            <div className="flex flex-wrap gap-2">
-              {POPULAR_HASHTAGS.map((hashtag) => (
-                <Badge
-                  key={hashtag}
-                  variant={filters.hashtags.includes(hashtag) ? 'default' : 'outline'}
-                  className="text-xs cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors"
-                  onClick={() => toggleHashtag(hashtag)}
-                >
-                  {hashtag}
-                </Badge>
-              ))}
-            </div>
-            {filters.hashtags.length > 0 && (
-              <div className="mt-3 pt-3 border-t">
-                <p className="text-xs text-muted-foreground mb-2">Seleccionados:</p>
-                <div className="flex flex-wrap gap-1">
-                  {filters.hashtags.map((hashtag) => (
-                    <Badge
-                      key={hashtag}
-                      variant="secondary"
-                      className="text-xs cursor-pointer hover:bg-red-100 hover:text-red-700 transition-colors"
-                      onClick={() => toggleHashtag(hashtag)}
-                    >
-                      {hashtag}
-                      <X className="h-3 w-3 ml-1" />
-                    </Badge>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -313,16 +237,14 @@ export function BlogFilters({ onFiltersChange }: BlogFiltersProps) {
                     Búsqueda: "{filters.search}"
                   </Badge>
                 )}
-                {filters.categories.map((category) => (
-                  <Badge key={category} variant="outline" className="text-xs">
-                    {category}
+                {filters.categories.map((categoryKey) => {
+                  const label = getBlogCategoryLabel(categoryKey, 'es'); // Usar español por defecto
+                  return (
+                  <Badge key={categoryKey} variant="outline" className="text-xs">
+                    {label}
                   </Badge>
-                ))}
-                {filters.hashtags.map((hashtag) => (
-                  <Badge key={hashtag} variant="outline" className="text-xs">
-                    {hashtag}
-                  </Badge>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </CardContent>

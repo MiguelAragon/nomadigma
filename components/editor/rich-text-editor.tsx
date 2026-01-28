@@ -78,6 +78,7 @@ const RichTextEditorComponent = ({
           levels: [1],
         },
         link: false,
+        underline: false, // Deshabilitar underline de StarterKit para evitar duplicación
       }),
       CustomImage,
       VideoExtension.configure({

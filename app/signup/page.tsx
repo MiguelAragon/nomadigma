@@ -7,10 +7,10 @@ import Image from 'next/image';
 export default function SignUpPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background con slide1 */}
+      {/* Background con background.jpeg */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/slides/slide1.jpg"
+          src="/slides/background3.jpg"
           alt="Nomadigma Journey"
           fill
           className="object-cover"
@@ -18,7 +18,7 @@ export default function SignUpPage() {
           quality={90}
         />
         {/* Overlay oscuro para mejor legibilidad */}
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/35" />
       </div>
 
       {/* Curvatura de la Tierra - visualización */}

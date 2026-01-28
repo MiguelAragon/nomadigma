@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { CompactFiltersState } from './compact-filters';
 import { useTranslation } from '@/hooks/use-translation';
-import { BLOG_CATEGORIES, getCategoryLabel } from '@/config/categories';
+import { CATEGORY_BLOG, getBlogCategoryLabel } from '@/config/categories';
 
 interface MobileFiltersDrawerProps {
   filters: CompactFiltersState;
@@ -125,17 +125,17 @@ export function MobileFiltersDrawer({ filters, onFiltersChange, hasActiveFilters
               )}
             </label>
             <div className="space-y-2">
-              {BLOG_CATEGORIES.map((category) => {
-                const label = getCategoryLabel(category, locale as 'en' | 'es');
+              {Object.entries(CATEGORY_BLOG).map(([categoryKey, categoryData]) => {
+                const label = categoryData[locale as 'en' | 'es'];
                 return (
                 <label
-                  key={category}
+                  key={categoryKey}
                   className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted transition-colors"
                 >
                   <input
                     type="checkbox"
-                    checked={filters.categories.includes(category)}
-                    onChange={() => toggleCategory(category)}
+                    checked={filters.categories.includes(categoryKey)}
+                    onChange={() => toggleCategory(categoryKey)}
                     className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 size-4"
                   />
                     <span className="text-sm flex-1">{label}</span>
@@ -163,13 +163,13 @@ export function MobileFiltersDrawer({ filters, onFiltersChange, hasActiveFilters
                     </button>
                   </Badge>
                 )}
-                {filters.categories.map((category) => {
-                  const label = getCategoryLabel(category, locale as 'en' | 'es');
+                {filters.categories.map((categoryKey) => {
+                  const label = getBlogCategoryLabel(categoryKey, locale as 'en' | 'es');
                   return (
-                  <Badge key={category} variant="secondary" className="gap-1">
+                  <Badge key={categoryKey} variant="secondary" className="gap-1">
                       {label}
                     <button
-                      onClick={() => toggleCategory(category)}
+                      onClick={() => toggleCategory(categoryKey)}
                       className="ml-1 hover:text-destructive"
                     >
                       <X className="h-3 w-3" />

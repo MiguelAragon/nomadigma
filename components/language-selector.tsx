@@ -89,13 +89,13 @@ export function LanguageSelector({ isLight = false }: LanguageSelectorProps) {
           variant="ghost" 
           size="sm"
           className={cn(
-            'cursor-pointer hover:bg-transparent gap-1.5',
+            'cursor-pointer hover:bg-transparent gap-1.5 px-0',
             isLight
               ? 'text-white/80 hover:text-white'
               : 'text-muted-foreground hover:text-foreground'
           )}
         >
-          <Globe className="size-4" />
+          <Globe className="size-5" />
           <span className="text-xs font-medium uppercase">{language.code}</span>
         </Button>
       </DropdownMenuTrigger>

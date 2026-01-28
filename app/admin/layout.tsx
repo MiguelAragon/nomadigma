@@ -38,7 +38,7 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-gray-50 dark:bg-gray-900 pt-20">
+      <main className="flex-1 bg-white pt-20">
         {children}
       </main>
       <Footer />

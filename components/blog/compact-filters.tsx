@@ -22,7 +22,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BLOG_CATEGORIES, getCategoryLabel, getCategoryValue } from '@/config/categories';
+import { CATEGORY_BLOG, getBlogCategoryLabel } from '@/config/categories';
 
 export interface CompactFiltersState {
   search: string;
@@ -116,13 +116,13 @@ export function CompactFilters({ filters, onFiltersChange }: CompactFiltersProps
             <DropdownMenuLabel>{locale === 'es' ? 'Seleccionar categorías' : 'Select categories'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="max-h-[220px] overflow-y-auto scrollbar-thin">
-              {BLOG_CATEGORIES.map((category) => {
-                const label = getCategoryLabel(category, locale as 'en' | 'es');
+              {Object.entries(CATEGORY_BLOG).map(([categoryKey, categoryData]) => {
+                const label = categoryData[locale as 'en' | 'es'];
                 return (
                 <DropdownMenuCheckboxItem
-                  key={category}
-                  checked={filters.categories.includes(category)}
-                  onCheckedChange={() => toggleCategory(category)}
+                  key={categoryKey}
+                  checked={filters.categories.includes(categoryKey)}
+                  onCheckedChange={() => toggleCategory(categoryKey)}
                   className="cursor-pointer"
                 >
                     {label}
@@ -164,13 +164,13 @@ export function CompactFilters({ filters, onFiltersChange }: CompactFiltersProps
             </Badge>
           )}
 
-          {filters.categories.map((category) => {
-            const label = getCategoryLabel(category, locale as 'en' | 'es');
+          {filters.categories.map((categoryKey) => {
+            const label = getBlogCategoryLabel(categoryKey, locale as 'en' | 'es');
             return (
-            <Badge key={category} variant="secondary" className="gap-1">
+            <Badge key={categoryKey} variant="secondary" className="gap-1">
                 {label}
               <button
-                onClick={() => toggleCategory(category)}
+                onClick={() => toggleCategory(categoryKey)}
                 className="ml-1 hover:text-destructive"
               >
                 <X className="h-3 w-3" />

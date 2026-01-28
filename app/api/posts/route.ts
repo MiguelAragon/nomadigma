@@ -52,7 +52,7 @@ export async function GET(req: Request) {
           slugEn: post.slugEn || '',
           slugEs: post.slugEs || '',
           coverImage: post.coverImage || null,
-          hashtags: post.hashtags || [],
+          categories: post.categories || [],
           language: post.language || 'en',
           readingTime: post.readingTime || 0,
           publishedAt: post.publishedAt?.toISOString() || null,
@@ -79,8 +79,7 @@ export async function GET(req: Request) {
           avatar: post.creator.imageUrl || undefined,
           bio: null,
         },
-        categories: [],
-        hashtags: post.hashtags || [],
+        categories: post.categories || [],
         attachments: post.coverImage ? [{
           id: 0,
           url: post.coverImage,
@@ -155,8 +154,7 @@ export async function GET(req: Request) {
           avatar: post.creator.imageUrl || undefined,
           bio: null, // Por ahora null, se puede agregar después si se añade el campo al modelo User
         },
-        categories: [], // Por ahora vacío, se puede agregar después
-        hashtags: post.hashtags || [],
+        categories: post.categories || [],
         attachments: post.coverImage ? [{
           id: 1,
           url: post.coverImageThumbnail || post.coverImage,
@@ -212,7 +210,7 @@ export async function POST(req: Request) {
     //Campos generales 
     const language = getFormValue<string>(formData, 'language');
     const readingTime = getFormValue<number>(formData, 'readingTime', { parse: v => parseInt(v) })
-    const hashtags = getFormValue<string[]>(formData, 'hashtags', { parse: v => JSON.parse(v), default: []})
+    const categories = getFormValue<string[]>(formData, 'categories', { parse: v => JSON.parse(v), default: []})
     const status = getFormValue<string>(formData, 'status') ?? 'DRAFT'
     const coverImageFile = formData.get('coverImage') as File | null
 
@@ -281,7 +279,7 @@ export async function POST(req: Request) {
     payload["readingTime"] = readingTime || 0;
     payload["status"] = status;
     payload["language"] = language; 
-    payload["hashtags"] = hashtags;
+    payload["categories"] = categories || [];
     
     if (!postId) {
       payload["creatorId"] = user.id;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, Home, Globe, FileText, Compass, Image, Shield, Users, ImageIcon, ChevronDown } from 'lucide-react';
+import { Menu, Home, Globe, FileText, Compass, Image, Shield, Users, ImageIcon, ChevronDown, ShoppingCart, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTitle, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import {
@@ -21,6 +21,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { LogIn } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePathname } from 'next/navigation';
+import { useStoreClient } from '@/app/(public)/store/components/context';
+import { Badge } from '@/components/ui/badge';
 
 const Header = () => {
   const { t, locale, i18n: i18nInstance } = useTranslation();
@@ -45,11 +47,10 @@ const Header = () => {
   }, [i18nInstance, locale, currentLocale, t]);
   
   const navItems = [
-    { title: t('navigation.home'), path: `/${currentLocale}`, icon: Home },
-    { title: t('navigation.destinations'), path: `/${currentLocale}/destinations`, icon: Globe },
-    { title: t('navigation.blog'), path: `/${currentLocale}/blog`, icon: FileText },
-    // { title: t('navigation.about_me'), path: `/${currentLocale}/about-me`, icon: Compass },
-    { title: t('navigation.gallery'), path: `/${currentLocale}/gallery`, icon: Image },
+    { title: t('navigation.home'), path: `/`, icon: Home },
+    { title: t('navigation.blog'), path: `/blog`, icon: FileText },
+    // { title: t('navigation.about_me'), path: `/about-me`, icon: Compass },
+    { title: t('navigation.gallery'), path: `/gallery`, icon: Image },
   ];
 
   const { resolvedTheme, setTheme } = useTheme();
@@ -58,6 +59,78 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [mounted, setMounted] = useState(false);
+  
+  // Get cart context (may be undefined if not in store context, but we handle it)
+  let cartContext;
+  try {
+    cartContext = useStoreClient();
+  } catch {
+    // Context not available, that's okay
+    cartContext = null;
+  }
+
+  // Read cart from localStorage when not in store context
+  const [cartItemsCount, setCartItemsCount] = useState(0);
+  const [cartTotal, setCartTotal] = useState(0);
+
+  useEffect(() => {
+    if (!cartContext && typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('nomadigma_cart');
+        if (stored) {
+          const cartItems = JSON.parse(stored);
+          const count = cartItems.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0);
+          const total = cartItems.reduce((sum: number, item: { total: string; quantity: number }) => sum + parseFloat(item.total) * item.quantity, 0);
+          setCartItemsCount(count);
+          setCartTotal(total);
+        } else {
+          setCartItemsCount(0);
+          setCartTotal(0);
+        }
+      } catch (error) {
+        console.error('Error reading cart from localStorage:', error);
+        setCartItemsCount(0);
+        setCartTotal(0);
+      }
+    } else if (cartContext) {
+      setCartItemsCount(cartContext.cartItemsCount);
+      setCartTotal(cartContext.cartTotal);
+    }
+  }, [cartContext, pathname]);
+
+  // Listen to storage changes to update cart count when outside store context
+  useEffect(() => {
+    if (!pathname?.startsWith('/store') && typeof window !== 'undefined') {
+      const handleStorageChange = () => {
+        try {
+          const stored = localStorage.getItem('nomadigma_cart');
+          if (stored) {
+            const cartItems = JSON.parse(stored);
+            const count = cartItems.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0);
+            const total = cartItems.reduce((sum: number, item: { total: string; quantity: number }) => sum + parseFloat(item.total) * item.quantity, 0);
+            setCartItemsCount(count);
+            setCartTotal(total);
+          } else {
+            setCartItemsCount(0);
+            setCartTotal(0);
+          }
+        } catch (error) {
+          console.error('Error reading cart from localStorage:', error);
+        }
+      };
+
+      // Listen to storage events (from other tabs/windows)
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Also listen to custom events (from same tab)
+      window.addEventListener('cartUpdated', handleStorageChange);
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('cartUpdated', handleStorageChange);
+      };
+    }
+  }, [pathname]);
 
   useEffect(() => {
     setMounted(true);
@@ -99,13 +172,16 @@ const Header = () => {
   const isActiveItem = (path: string) => {
     if (typeof window === 'undefined' || !pathname) return false;
     
-    // Si el path es el home (solo el locale), debe coincidir exactamente
-    if (path === `/${currentLocale}` || path === `/${currentLocale}/`) {
-      return pathname === `/${currentLocale}` || pathname === `/${currentLocale}/`;
+    // Normalizar pathname removiendo locale si existe
+    const normalizedPathname = pathname.replace(/^\/(en|es)/, '') || '/';
+    
+    // Si el path es el home, debe coincidir exactamente
+    if (path === `/` || path === ``) {
+      return normalizedPathname === `/` || normalizedPathname === ``;
     }
     
-    // Para otros paths, verificar si el pathname empieza con el path
-    return pathname === path || pathname.startsWith(path + '/');
+    // Para otros paths, verificar si el pathname normalizado empieza con el path
+    return normalizedPathname === path || normalizedPathname.startsWith(path + '/');
   };
 
   return (
@@ -118,7 +194,7 @@ const Header = () => {
       <div className={cn("container mx-auto px-6 py-4 flex items-center justify-between")}  >
         {/* Left Side: Logo + Navigation */}
         <div className="flex items-center gap-4 md:gap-8 min-w-0">
-          <Link href={`/${currentLocale}`} className="shrink-0">
+          <Link href={`/`} className="shrink-0">
             <Logo />
           </Link>
           
@@ -178,6 +254,12 @@ const Header = () => {
                     <Link href="/admin/blog" className="flex items-center gap-2 cursor-pointer">
                       <FileText className="size-4" />
                       {locale === 'es' ? 'Blog' : 'Blog'}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/products" className="flex items-center gap-2 cursor-pointer">
+                      <ShoppingBag className="size-4" />
+                      {locale === 'es' ? 'Productos' : 'Products'}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -247,6 +329,17 @@ const Header = () => {
                         {locale === 'es' ? 'Blog' : 'Blog'}
                       </Button>
                       <Button 
+                        onClick={() => handleNavClick('/admin/products')}
+                        variant="ghost"
+                        className={cn(
+                          'w-full justify-start hover:text-indigo-600 dark:hover:text-indigo-400',
+                          pathname === '/admin/products' && 'text-indigo-600 dark:text-indigo-400 font-medium'
+                        )}
+                      >
+                        <ShoppingBag className="size-4 mr-2" />
+                        {locale === 'es' ? 'Productos' : 'Products'}
+                      </Button>
+                      <Button 
                         onClick={() => handleNavClick('/admin/gallery')}
                         variant="ghost"
                         className={cn(
@@ -265,20 +358,71 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Right Side: Language + Theme + User */}
+        {/* Right Side: Store Button always visible */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Language Selector */}
-          <LanguageSelector />
+          {/* Language Selector - Only show when user is NOT logged in */}
+          {!user && <LanguageSelector />}
+          
+          {/* Botón unificado: Carrito si hay productos, Tienda si no hay */}
+          {(() => {
+            const hasItems = cartContext ? cartContext.cartItemsCount > 0 : cartItemsCount > 0;
+            const total = cartContext ? cartContext.cartTotal : cartTotal;
+            const count = cartContext ? cartContext.cartItemsCount : cartItemsCount;
+            
+            return hasItems ? (
+              /* Carrito con badge y total cuando hay productos */
+              <Button
+                variant="ghost"
+                className="flex items-center gap-1 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground p-0 h-auto"
+                asChild
+              >
+                <Link href="/store/checkout">
+                  <div className="relative mr-2">
+                    <ShoppingCart className="size-5" />
+                    <Badge
+                      className="absolute -top-2 -right-2"
+                      variant="success"
+                      size="xs"
+                      shape="circle"
+                    >
+                      {count}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-secondary-foreground">
+                      Total
+                    </span>
+                    <span className="text-xs font-medium text-foreground">
+                      ${total.toFixed(2)}
+                    </span>
+                  </div>
+                </Link>
+              </Button>
+            ) : (
+              /* Botón Tienda con icono de bolsa cuando NO hay productos */
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground hover:bg-transparent gap-2"
+                asChild
+              >
+                <Link href="/store">
+                  <ShoppingBag className="size-5" />
+                  {locale === 'es' ? 'Tienda' : 'Store'}
+                </Link>
+              </Button>
+            );
+          })()}
 
-          {/* Theme Toggle - Hidden on mobile */}
-          {mounted && (
+          {/* Theme Toggle - Only show if user NOT logged in and NOT in store */}
+          {mounted && !user && !pathname?.startsWith('/store') && (
             <Button 
               className="cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground hidden md:flex" 
               variant="ghost" 
               size="icon" 
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             >
-              {resolvedTheme === 'dark' ? <Sun className="size-4"/> : <Moon className="size-4"/>}
+              {resolvedTheme === 'dark' ? <Sun className="size-5"/> : <Moon className="size-5"/>}
             </Button>
           )}
 
@@ -299,7 +443,7 @@ const Header = () => {
                   <span>Cargando...</span>
                 </div>
               ) : (
-                  <Link href={`/${currentLocale}/login`}>
+                  <Link href={`/login`}>
                     <LogIn className="size-4" />
                     {t('common.login')}
                   </Link>

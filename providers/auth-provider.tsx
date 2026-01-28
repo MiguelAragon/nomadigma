@@ -86,11 +86,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUpUrl = process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL || "/signup";
   const afterSignInUrl = process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL || "/";
   const afterSignUpUrl = process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL || "/";
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   return (
     <ClerkProvider
-      publishableKey={publishableKey}
       signInUrl={signInUrl}
       signUpUrl={signUpUrl}
       afterSignInUrl={afterSignInUrl}

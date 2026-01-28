@@ -3,10 +3,7 @@ import Stripe from 'stripe';
 import { APIResponse } from '@/lib/api-helper';
 import { prisma } from '@/lib/prisma';
 import { sendOrderConfirmationEmail } from '@/lib/email';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-12-15.clover',
-});
+import { getStripe } from '@/lib/stripe';
 
 export async function GET(req: NextRequest) {
   try {
@@ -85,6 +82,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Verificar el estado de la sesión en Stripe
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     // Si el pago fue exitoso, actualizar la orden

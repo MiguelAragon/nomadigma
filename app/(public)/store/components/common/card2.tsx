@@ -112,7 +112,7 @@ export function Card2({ badge, logo, title, total, star, label, productId, produ
           ) : star ? (
             <Badge
               size="sm"
-              variant="warning"
+              variant="success"
               shape="circle"
               className="rounded-full gap-1"
             >

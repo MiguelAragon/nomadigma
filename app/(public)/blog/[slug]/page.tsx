@@ -29,11 +29,16 @@ function getTranslation(locale: string, key: string): string {
   return translations[locale]?.[key] || key;
 }
 
+// Helper function to get localized post field
+function getLocalizedField<T>(locale: 'en' | 'es', enValue: T, esValue: T): T {
+  return locale === 'en' ? enValue : esValue;
+}
+
 // Generar metadata dinámica para SEO y Open Graph
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   // Usar español por defecto, se puede obtener del localStorage en el cliente
-  const locale = 'es';
+  const locale: 'en' | 'es' = 'es';
 
   try {
     const post = await prisma.post.findFirst({
@@ -63,9 +68,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       };
     }
 
-    const title = locale === 'en' ? post.titleEn : post.titleEs;
-    const description = locale === 'en' ? post.descriptionEn : post.descriptionEs;
-    const content = locale === 'en' ? post.contentEn : post.contentEs;
+    const title = getLocalizedField(locale, post.titleEn, post.titleEs);
+    const description = getLocalizedField(locale, post.descriptionEn, post.descriptionEs);
+    const content = getLocalizedField(locale, post.contentEn, post.contentEs);
     const authorName = `${post.creator.firstName || ''} ${post.creator.lastName || ''}`.trim() || 'Nomadigma';
     
     // Extraer primer párrafo del contenido como descripción si no hay descriptionEn/Es
@@ -76,7 +81,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 
     // Traducir categorías para metadata
-    const categoryLabels = (post.categories || []).map(cat => 
+    const categories = (post as any).categories as string[] | undefined;
+    const categoryLabels = (categories || []).map((cat: string) => 
       getBlogCategoryLabel(cat, locale as 'en' | 'es')
     );
 
@@ -95,7 +101,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description: metaDescription || 'Artículo de Nomadigma',
         url: canonicalUrl,
         siteName: 'Nomadigma',
-        locale: locale === 'es' ? 'es_ES' : 'en_US',
+        locale: getLocalizedField(locale, 'en_US', 'es_ES'),
         type: 'article',
         publishedTime: post.publishedAt?.toISOString(),
         modifiedTime: post.updatedAt?.toISOString(),
@@ -162,7 +168,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   // El locale se obtiene del localStorage en el cliente, usar español por defecto
-  const locale = 'es';
+  const locale: 'en' | 'es' = 'es';
 
   // Fetch post directly from database
   const post = await prisma.post.findFirst({
@@ -183,13 +189,14 @@ export default async function BlogPostPage({ params }: PageProps) {
   }
 
   // Map post to expected format
-  const title = locale === 'en' ? post.titleEn : post.titleEs;
-  const slugValue = locale === 'en' ? post.slugEn : post.slugEs;
-  const description = locale === 'en' ? post.descriptionEn : post.descriptionEs;
-  const content = locale === 'en' ? post.contentEn : post.contentEs;
+  const title = getLocalizedField(locale, post.titleEn, post.titleEs);
+  const slugValue = getLocalizedField(locale, post.slugEn, post.slugEs);
+  const description = getLocalizedField(locale, post.descriptionEn, post.descriptionEs);
+  const content = getLocalizedField(locale, post.contentEn, post.contentEs);
   
   // Traducir categorías para mostrar
-  const categoryLabels = (post.categories || []).map(cat => 
+  const categories = (post as any).categories as string[] | undefined;
+  const categoryLabels = (categories || []).map((cat: string) => 
     getBlogCategoryLabel(cat, locale as 'en' | 'es')
   );
     
